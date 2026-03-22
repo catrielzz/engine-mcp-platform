@@ -1,0 +1,38 @@
+{
+  "name": "engine-mcp-platform",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest --config vitest.workspace.ts run --passWithNoTests",
+    "bench:core-server": "tsx scripts/bench/core-server.ts",
+    "bench:unity-bridge": "tsx scripts/bench/unity-bridge.ts",
+    "bench:core-server:approval": "node --expose-gc ./node_modules/tsx/dist/cli.mjs scripts/bench/core-server.ts --iterations 10 --warmup 3 --output-dir artifacts/bench/approval",
+    "bench:unity-bridge:approval": "node --expose-gc ./node_modules/tsx/dist/cli.mjs scripts/bench/unity-bridge.ts --iterations 10 --warmup 3 --output-dir artifacts/bench/approval",
+    "bench:report": "tsx scripts/bench/report.ts",
+    "bench:check-report": "tsx scripts/bench/check-report.ts",
+    "bench:compare": "tsx scripts/bench/compare.ts",
+    "bench:compare:core-server:baseline": "tsx scripts/bench/compare.ts --baseline artifacts/bench/baselines/core-server-smoke-2026-03-22.json --candidate artifacts/bench/core-server-latest.json",
+    "bench:compare:unity-bridge:baseline": "tsx scripts/bench/compare.ts --baseline artifacts/bench/baselines/unity-bridge-smoke-2026-03-22.json --candidate artifacts/bench/unity-bridge-latest.json",
+    "bench:check:core-server": "tsx scripts/bench/check.ts --profile core-server",
+    "bench:check:unity-bridge": "tsx scripts/bench/check.ts --profile unity-bridge",
+    "bench:check:core-server:approval": "tsx scripts/bench/check.ts --profile core-server-approval",
+    "bench:check:unity-bridge:approval": "tsx scripts/bench/check.ts --profile unity-bridge-approval",
+    "changeset": "changeset"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "ajv": "^8.17.1",
+    "turbo": "^2.5.6",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.0"
+  }
+}

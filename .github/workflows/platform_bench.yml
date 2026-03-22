@@ -1,0 +1,124 @@
+name: Platform Bench
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  core-server-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Run core-server approval benchmark
+        run: pnpm bench:core-server:approval
+      - name: Check core-server approval benchmark
+        id: core_server_check
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/bench/check.ts --profile core-server-approval | tee artifacts/bench/approval/core-server-check-latest.json
+      - name: Publish core-server approval summary
+        if: always()
+        run: |
+          if [ -f artifacts/bench/approval/core-server-latest.json ]; then
+            echo "# core-server approval" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/report.ts --input artifacts/bench/approval/core-server-latest.json >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "# core-server approval" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No approval artifact was generated for this job." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Publish core-server approval gate summary
+        if: always()
+        run: |
+          if [ -f artifacts/bench/approval/core-server-check-latest.json ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/check-report.ts --input artifacts/bench/approval/core-server-check-latest.json --title "core-server approval gate" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/check-report.ts --input artifacts/bench/approval/core-server-check-latest.json --format workflow
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "# core-server approval gate" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No gate report was generated for this job." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload core-server approval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-server-approval-${{ github.run_id }}
+          path: artifacts/bench/approval/core-server*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Fail core-server approval gate
+        if: steps.core_server_check.outcome == 'failure'
+        run: exit 1
+
+  unity-bridge-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Run unity-bridge approval benchmark
+        run: pnpm bench:unity-bridge:approval
+      - name: Check unity-bridge approval benchmark
+        id: unity_bridge_check
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/bench/check.ts --profile unity-bridge-approval | tee artifacts/bench/approval/unity-bridge-check-latest.json
+      - name: Publish unity-bridge approval summary
+        if: always()
+        run: |
+          if [ -f artifacts/bench/approval/unity-bridge-latest.json ]; then
+            echo "# unity-bridge approval" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/report.ts --input artifacts/bench/approval/unity-bridge-latest.json >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "# unity-bridge approval" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No approval artifact was generated for this job." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Publish unity-bridge approval gate summary
+        if: always()
+        run: |
+          if [ -f artifacts/bench/approval/unity-bridge-check-latest.json ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/check-report.ts --input artifacts/bench/approval/unity-bridge-check-latest.json --title "unity-bridge approval gate" >> "$GITHUB_STEP_SUMMARY"
+            pnpm exec tsx scripts/bench/check-report.ts --input artifacts/bench/approval/unity-bridge-check-latest.json --format workflow
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "# unity-bridge approval gate" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No gate report was generated for this job." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload unity-bridge approval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-bridge-approval-${{ github.run_id }}
+          path: artifacts/bench/approval/unity-bridge*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Fail unity-bridge approval gate
+        if: steps.unity_bridge_check.outcome == 'failure'
+        run: exit 1

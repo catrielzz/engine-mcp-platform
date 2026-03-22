@@ -5,11 +5,15 @@
 
 # AI configurations
 **/.claude/settings.local.json
+.claude/
 .gemini
 .aider*
 .roo
 
 # Commands and env files
+.env
+.env.*
+!.env.example
 commands/TestResults
 commands/.env
 !commands/.env.example
@@ -19,3 +23,16 @@ commands/.env
 
 # Wiki project
 Unity-MCP.wiki
+
+# JS/TS platform workspace
+**/node_modules/
+.pnpm-store/
+.turbo/
+coverage/
+dist/
+*.tsbuildinfo
+artifacts/bench/*.json
+artifacts/bench/approval/*.json
+artifacts/bench-smoke/
+artifacts/bench-script-smoke*/
+!artifacts/bench/baselines/*.json
