@@ -100,6 +100,8 @@ jobs:
           customImage: ${{ steps.custom_image.outputs.image }}
           artifactsPath: artifacts-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.platform }}
           customParameters: -CI true -GITHUB_ACTIONS true
+        env:
+          UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
 
       # --------------------------------------------------------------------- #
       - uses: actions/upload-artifact@v6

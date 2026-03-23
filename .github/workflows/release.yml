@@ -91,6 +91,8 @@ jobs:
           checkName: Unity Installer EditMode Test Results
           artifactsPath: artifacts-installer-editmode
           customParameters: -CI true -GITHUB_ACTIONS true
+        env:
+          UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
 
       - name: Clean Unity artifacts and reset git state
         run: |
@@ -113,6 +115,8 @@ jobs:
           buildsPath: build
           buildMethod: com.IvanMurzak.Unity.MCP.Installer.PackageExporter.ExportPackage
           customParameters: -CI true -GITHUB_ACTIONS true
+        env:
+          UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
 
       - name: Upload Unity Package as artifact
         uses: actions/upload-artifact@v6
