@@ -74,7 +74,8 @@ export const BENCH_PROFILES: Record<string, BenchProfile> = {
     name: "core-server-approval",
     benchmark: "core-server",
     baselineKind: "approval",
-    baselinePath: "artifacts/bench/baselines/core-server-approval-2026-03-22.json",
+    baselinePath:
+      "artifacts/bench/baselines/core-server-approval-github-ubuntu-2026-03-23.json",
     candidatePath: "artifacts/bench/approval/core-server-latest.json",
     recommendedIterations: 10,
     recommendedWarmupIterations: 3,
@@ -102,7 +103,8 @@ export const BENCH_PROFILES: Record<string, BenchProfile> = {
     name: "unity-bridge-approval",
     benchmark: "unity-bridge",
     baselineKind: "approval",
-    baselinePath: "artifacts/bench/baselines/unity-bridge-approval-2026-03-22.json",
+    baselinePath:
+      "artifacts/bench/baselines/unity-bridge-approval-github-ubuntu-2026-03-23.json",
     candidatePath: "artifacts/bench/approval/unity-bridge-latest.json",
     recommendedIterations: 10,
     recommendedWarmupIterations: 3,

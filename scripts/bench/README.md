@@ -81,6 +81,11 @@ The repository also keeps the first approval-oriented baselines under:
 - `artifacts/bench/baselines/core-server-approval-2026-03-22.json`
 - `artifacts/bench/baselines/unity-bridge-approval-2026-03-22.json`
 
+The active CI approval baselines now target the GitHub-hosted Ubuntu runner family:
+
+- `artifacts/bench/baselines/core-server-approval-github-ubuntu-2026-03-23.json`
+- `artifacts/bench/baselines/unity-bridge-approval-github-ubuntu-2026-03-23.json`
+
 Recommended workflow:
 
 1. Use the default `bench:*` scripts for quick smoke drift checks under `artifacts/bench/`.
@@ -99,6 +104,9 @@ Approval notes:
 - approval runs use `10` iterations and `3` warmup iterations
 - approval scripts run Node with `--expose-gc` so the harness can call `globalThis.gc()` when available before and after measurement
 - approval profiles are intended to become the stricter long-term gate once enough history exists to tighten thresholds further
+- approval baselines are runner-specific; the repository's active approval profiles target `ubuntu-latest` because `.github/workflows/platform_bench.yml` runs on GitHub-hosted Ubuntu VMs
+- `check.ts` now fails explicitly when the baseline and candidate artifacts come from different runner families such as local `win32/x64` versus CI `linux/x64`
+- if you want to inspect local Windows or macOS approval runs, compare them against a same-platform baseline instead of reusing the GitHub Ubuntu approval baseline
 
 ## CI
 
