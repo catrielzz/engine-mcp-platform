@@ -16,11 +16,11 @@ inputs:
   unity-email:
     description: "Unity account email"
     required: false
-    default: "UnityEngineTester@gmail.com"
+    default: ""
   unity-password:
     description: "Unity account password"
     required: false
-    default: "ZUq3YR6qM1"
+    default: ""
 
 outputs:
   license:
@@ -67,6 +67,14 @@ runs:
         UNITY_EMAIL: ${{ inputs.unity-email }}
         UNITY_PASSWORD: ${{ inputs.unity-password }}
       run: |
+        if [ -z "$UNITY_EMAIL" ] || [ -z "$UNITY_PASSWORD" ]; then
+          echo "UNITY_EMAIL and UNITY_PASSWORD are required for license activation."
+          exit 1
+        fi
+
+        echo "::add-mask::$UNITY_EMAIL"
+        echo "::add-mask::$UNITY_PASSWORD"
+
         MAX_RETRIES=5
         for attempt in $(seq 1 $MAX_RETRIES); do
           echo "=== License activation attempt $attempt of $MAX_RETRIES ==="

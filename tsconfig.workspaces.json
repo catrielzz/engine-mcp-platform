@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/policy-engine"
+    },
+    {
+      "path": "./packages/conformance-runner"
+    },
+    {
+      "path": "./packages/core-server"
+    },
+    {
+      "path": "./packages/cli"
+    },
+    {
+      "path": "./adapters/unity/bridge"
+    }
+  ]
+}

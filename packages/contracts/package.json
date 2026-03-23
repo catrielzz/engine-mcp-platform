@@ -1,0 +1,19 @@
+{
+  "name": "@engine-mcp/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "typecheck": "tsc -b tsconfig.json",
+    "test": "vitest --config ../../vitest.package.ts run ./src --passWithNoTests"
+  },
+  "dependencies": {
+    "ajv": "^8.18.0"
+  }
+}

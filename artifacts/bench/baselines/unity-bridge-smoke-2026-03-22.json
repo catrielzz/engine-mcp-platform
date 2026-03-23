@@ -1,0 +1,161 @@
+{
+  "benchmark": "unity-bridge",
+  "generatedAt": "2026-03-22T06:10:09.822Z",
+  "node": {
+    "version": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64",
+    "pid": 20304
+  },
+  "options": {
+    "iterations": 1,
+    "warmupIterations": 1,
+    "outputDir": "artifacts/bench-script-smoke-unity-bridge-cli"
+  },
+  "scenarios": [
+    {
+      "name": "localhost.inline_request.editor_state_read",
+      "iterations": 1,
+      "warmupIterations": 1,
+      "latencyMs": {
+        "min": 2.6562999999996464,
+        "max": 2.6562999999996464,
+        "mean": 2.6562999999996464,
+        "p50": 2.6562999999996464,
+        "p95": 2.6562999999996464
+      },
+      "eventLoopDelayMs": {
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "p95": 0
+      },
+      "memory": {
+        "before": {
+          "rss": 106139648,
+          "heapTotal": 33370112,
+          "heapUsed": 16179824,
+          "external": 5313666,
+          "arrayBuffers": 1140861,
+          "availableMemory": 22102192128
+        },
+        "after": {
+          "rss": 106352640,
+          "heapTotal": 33370112,
+          "heapUsed": 16447952,
+          "external": 5315154,
+          "arrayBuffers": 1142309,
+          "availableMemory": 22102056960
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 0,
+        "systemCPUTime": 0,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 0,
+        "involuntaryContextSwitches": 0,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        2.6562999999996464
+      ]
+    },
+    {
+      "name": "localhost.concurrent_requests.within_cap",
+      "iterations": 1,
+      "warmupIterations": 1,
+      "latencyMs": {
+        "min": 30.085399999999936,
+        "max": 30.085399999999936,
+        "mean": 30.085399999999936,
+        "p50": 30.085399999999936,
+        "p95": 30.085399999999936
+      },
+      "eventLoopDelayMs": {
+        "min": 15.867904,
+        "max": 15.876095,
+        "mean": 15.872,
+        "p95": 15.876095
+      },
+      "memory": {
+        "before": {
+          "rss": 110211072,
+          "heapTotal": 34455552,
+          "heapUsed": 17841048,
+          "external": 5320946,
+          "arrayBuffers": 1148101,
+          "availableMemory": 22090235904
+        },
+        "after": {
+          "rss": 116809728,
+          "heapTotal": 34979840,
+          "heapUsed": 18922648,
+          "external": 5334930,
+          "arrayBuffers": 1162085,
+          "availableMemory": 22081847296
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 47000,
+        "systemCPUTime": 0,
+        "maxRSS": 19588,
+        "voluntaryContextSwitches": 0,
+        "involuntaryContextSwitches": 0,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        30.085399999999936
+      ]
+    },
+    {
+      "name": "localhost.invocation_timeout.abort_path",
+      "iterations": 1,
+      "warmupIterations": 1,
+      "latencyMs": {
+        "min": 31.485299999999825,
+        "max": 31.485299999999825,
+        "mean": 31.485299999999825,
+        "p50": 31.485299999999825,
+        "p95": 31.485299999999825
+      },
+      "eventLoopDelayMs": {
+        "min": 16.130048,
+        "max": 16.138239,
+        "mean": 16.134144,
+        "p95": 16.138239
+      },
+      "memory": {
+        "before": {
+          "rss": 108556288,
+          "heapTotal": 34979840,
+          "heapUsed": 19351544,
+          "external": 5336166,
+          "arrayBuffers": 1163321,
+          "availableMemory": 22098280448
+        },
+        "after": {
+          "rss": 108560384,
+          "heapTotal": 34979840,
+          "heapUsed": 19499920,
+          "external": 5337402,
+          "arrayBuffers": 1164557,
+          "availableMemory": 22098280448
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 0,
+        "systemCPUTime": 0,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 0,
+        "involuntaryContextSwitches": 0,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        31.485299999999825
+      ]
+    }
+  ]
+}
