@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/test.run.input.schema.json",
+  "title": "test.run input",
+  "type": "object",
+  "properties": {
+    "filter": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/testFilter"
+    },
+    "executionTarget": {
+      "type": "string",
+      "enum": ["editor", "runtime", "all"]
+    },
+    "waitForCompletion": {
+      "type": "boolean"
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false
+}

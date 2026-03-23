@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/console.read.output.schema.json",
+  "title": "console.read output",
+  "type": "object",
+  "required": ["entries", "truncated"],
+  "properties": {
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/consoleEntry"
+      }
+    },
+    "nextSequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

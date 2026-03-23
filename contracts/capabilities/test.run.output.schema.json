@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/test.run.output.schema.json",
+  "title": "test.run output",
+  "type": "object",
+  "required": ["jobId", "status"],
+  "properties": {
+    "jobId": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["queued", "running", "completed", "failed"]
+    },
+    "acceptedFilter": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/testFilter"
+    }
+  },
+  "additionalProperties": false
+}

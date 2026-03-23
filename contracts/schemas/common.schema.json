@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json",
+  "title": "Engine MCP Platform Common Contract Types",
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilityId": {
+      "type": "string",
+      "pattern": "^[a-z]+(?:\\.[a-z]+)+$"
+    },
+    "operationClass": {
+      "type": "string",
+      "enum": ["read", "write_safe", "write_project", "destructive", "external"]
+    },
+    "contractStatus": {
+      "type": "string",
+      "enum": ["bootstrap", "active", "deprecated"]
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" }
+      ],
+      "items": false
+    },
+    "entityRef": {
+      "type": "object",
+      "properties": {
+        "logicalName": { "$ref": "#/$defs/nonEmptyString" },
+        "enginePath": { "$ref": "#/$defs/nonEmptyString" },
+        "displayName": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["logicalName"],
+          "properties": {
+            "logicalName": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        {
+          "required": ["enginePath"],
+          "properties": {
+            "enginePath": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        {
+          "required": ["displayName"],
+          "properties": {
+            "displayName": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "transform3D": {
+      "type": "object",
+      "properties": {
+        "position": { "$ref": "#/$defs/vector3" },
+        "rotationEuler": { "$ref": "#/$defs/vector3" },
+        "scale": { "$ref": "#/$defs/vector3" }
+      },
+      "additionalProperties": false
+    },
+    "componentPatch": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/$defs/nonEmptyString" },
+        "properties": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "assetRecord": {
+      "type": "object",
+      "required": ["assetPath", "kind"],
+      "properties": {
+        "assetGuid": { "$ref": "#/$defs/nonEmptyString" },
+        "assetPath": { "$ref": "#/$defs/nonEmptyString" },
+        "displayName": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": {
+          "type": "string",
+          "enum": ["scene", "prefab", "script", "material", "texture", "shader", "other"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["severity", "message"],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error"]
+        },
+        "message": { "$ref": "#/$defs/nonEmptyString" },
+        "code": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "consoleEntry": {
+      "type": "object",
+      "required": ["severity", "message"],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error"]
+        },
+        "message": { "$ref": "#/$defs/nonEmptyString" },
+        "channel": { "$ref": "#/$defs/nonEmptyString" },
+        "source": { "$ref": "#/$defs/nonEmptyString" },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "testFilter": {
+      "type": "object",
+      "properties": {
+        "namePattern": { "$ref": "#/$defs/nonEmptyString" },
+        "paths": { "$ref": "#/$defs/stringList" },
+        "tags": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "testCaseResult": {
+      "type": "object",
+      "required": ["name", "status"],
+      "properties": {
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "skipped"]
+        },
+        "durationMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "message": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

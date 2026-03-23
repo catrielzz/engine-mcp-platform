@@ -1,0 +1,87 @@
+{
+  "$schema": "https://engine-mcp-platform.local/contracts/schemas/capability-catalog.schema.json",
+  "slice": "p0",
+  "version": "0.1.0",
+  "capabilities": [
+    {
+      "capability": "editor.state.read",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Read high-level editor state, activity, and readiness.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/editor.state.read.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/editor.state.read.output.schema.json"
+    },
+    {
+      "capability": "scene.hierarchy.read",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Read hierarchy data for a scene or equivalent engine container.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.hierarchy.read.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.hierarchy.read.output.schema.json"
+    },
+    {
+      "capability": "scene.object.create",
+      "operationClass": "write_safe",
+      "status": "bootstrap",
+      "summary": "Create an object inside a scene or hierarchy container.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.create.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.create.output.schema.json"
+    },
+    {
+      "capability": "scene.object.update",
+      "operationClass": "write_safe",
+      "status": "bootstrap",
+      "summary": "Update an existing object and its patchable properties.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.update.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.update.output.schema.json"
+    },
+    {
+      "capability": "scene.object.delete",
+      "operationClass": "destructive",
+      "status": "bootstrap",
+      "summary": "Delete one object from a scene or hierarchy container.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.delete.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.delete.output.schema.json"
+    },
+    {
+      "capability": "asset.search",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Search assets by query, kind, and roots.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/asset.search.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/asset.search.output.schema.json"
+    },
+    {
+      "capability": "script.validate",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Validate one script or code file and return diagnostics.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/script.validate.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/script.validate.output.schema.json"
+    },
+    {
+      "capability": "console.read",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Read console entries with severity and sequence filtering.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/console.read.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/console.read.output.schema.json"
+    },
+    {
+      "capability": "test.run",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Start a test run and return a job handle.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/test.run.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/test.run.output.schema.json"
+    },
+    {
+      "capability": "test.job.read",
+      "operationClass": "read",
+      "status": "bootstrap",
+      "summary": "Read the current status and summary of a test job.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/test.job.read.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/test.job.read.output.schema.json"
+    }
+  ]
+}

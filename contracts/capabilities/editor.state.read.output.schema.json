@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/editor.state.read.output.schema.json",
+  "title": "editor.state.read output",
+  "type": "object",
+  "required": ["engine", "isReady", "activity", "diagnostics"],
+  "properties": {
+    "engine": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "engineVersion": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "workspaceName": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "isReady": {
+      "type": "boolean"
+    },
+    "activity": {
+      "type": "string",
+      "enum": ["idle", "busy", "compiling", "testing", "playing", "importing"]
+    },
+    "selectionCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "activeContainer": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/diagnostic"
+      }
+    }
+  },
+  "additionalProperties": false
+}

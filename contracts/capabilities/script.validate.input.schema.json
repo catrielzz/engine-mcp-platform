@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/script.validate.input.schema.json",
+  "title": "script.validate input",
+  "type": "object",
+  "properties": {
+    "path": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "assetGuid": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "includeWarnings": {
+      "type": "boolean"
+    }
+  },
+  "anyOf": [
+    {
+      "required": ["path"],
+      "properties": {
+        "path": {
+          "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+        }
+      }
+    },
+    {
+      "required": ["assetGuid"],
+      "properties": {
+        "assetGuid": {
+          "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

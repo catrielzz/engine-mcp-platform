@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/script.validate.output.schema.json",
+  "title": "script.validate output",
+  "type": "object",
+  "required": ["isValid", "diagnostics"],
+  "properties": {
+    "targetPath": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "isValid": {
+      "type": "boolean"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/diagnostic"
+      }
+    }
+  },
+  "additionalProperties": false
+}
