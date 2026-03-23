@@ -22,6 +22,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm build
       - name: Run core-server approval benchmark
         run: pnpm bench:core-server:approval
       - name: Check core-server approval benchmark
@@ -80,6 +82,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm build
       - name: Run unity-bridge approval benchmark
         run: pnpm bench:unity-bridge:approval
       - name: Check unity-bridge approval benchmark
