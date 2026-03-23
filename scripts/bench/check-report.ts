@@ -29,6 +29,16 @@ interface CheckReport {
   baselineKind: "smoke" | "approval";
   baseline: string;
   candidate: string;
+  baselineRuntime?: {
+    version: string;
+    platform: string;
+    arch: string;
+  };
+  candidateRuntime?: {
+    version: string;
+    platform: string;
+    arch: string;
+  };
   recommended: {
     iterations: number;
     warmupIterations: number;
@@ -40,6 +50,10 @@ interface CheckReport {
     missing: number;
   };
   comparisons: CheckScenario[];
+  error?: {
+    code: string;
+    message: string;
+  };
 }
 
 interface CheckReportCliOptions {
@@ -125,11 +139,27 @@ function renderMarkdownSummary(
     `- Source: \`${resolve(inputPath)}\``,
     `- Profile: \`${report.profile}\``,
     `- Baseline kind: \`${report.baselineKind}\``,
+    ...(report.baselineRuntime
+      ? [
+          `- Baseline runtime: \`${report.baselineRuntime.platform}/${report.baselineRuntime.arch}\` on Node \`${report.baselineRuntime.version}\``
+        ]
+      : []),
+    ...(report.candidateRuntime
+      ? [
+          `- Candidate runtime: \`${report.candidateRuntime.platform}/${report.candidateRuntime.arch}\` on Node \`${report.candidateRuntime.version}\``
+        ]
+      : []),
     `- Recommended iterations: \`${report.recommended.iterations}\``,
     `- Recommended warmup: \`${report.recommended.warmupIterations}\``,
     `- Summary: \`regressed=${report.summary.regressed}\`, \`missing=${report.summary.missing}\`, \`unchanged=${report.summary.unchanged}\`, \`improved=${report.summary.improved}\``,
     ""
   ];
+
+  if (report.error) {
+    lines.push(`- Gate result: \`${report.error.code}\``, "");
+    lines.push(`> ${report.error.message}`);
+    return `${lines.join("\n")}\n`;
+  }
 
   if (regressed.length === 0 && missing.length === 0) {
     lines.push("- Gate result: no regressions detected.");
@@ -163,6 +193,15 @@ function renderWorkflowCommands(report: CheckReport): string {
   const commands: string[] = [];
   const regressed = report.comparisons.filter((scenario) => scenario.status === "regressed");
   const missing = report.comparisons.filter((scenario) => scenario.status === "missing");
+
+  if (report.error) {
+    commands.push(
+      `::error title=${escapeWorkflowValue(
+        `${report.profile} benchmark gate`
+      )}::${escapeWorkflowValue(report.error.message)}`
+    );
+    return `${commands.join("\n")}\n`;
+  }
 
   if (regressed.length === 0 && missing.length === 0) {
     commands.push(

@@ -27,6 +27,17 @@ interface BenchScenarioCheck {
   metrics: BenchMetricComparison[];
 }
 
+interface BenchRuntimeDescriptor {
+  version: string;
+  platform: BenchReport["node"]["platform"];
+  arch: string;
+}
+
+interface BenchCheckError {
+  code: "incompatible_runtime";
+  message: string;
+}
+
 async function main(): Promise<void> {
   const options = parseCheckCliOptions(process.argv.slice(2));
   const profile = getBenchProfile(options.profileName);
@@ -34,8 +45,18 @@ async function main(): Promise<void> {
   const candidatePath = resolve(options.candidatePath ?? profile.candidatePath);
   const baseline = await readBenchReport(baselinePath);
   const candidate = await readBenchReport(candidatePath);
-  const comparisons = compareAgainstProfile(baseline, candidate, profile);
-  const summary = summarizeComparisons(comparisons);
+  const baselineRuntime = toRuntimeDescriptor(baseline);
+  const candidateRuntime = toRuntimeDescriptor(candidate);
+  const error = resolveCompatibilityError(baseline, candidate, profile);
+  const comparisons = error ? [] : compareAgainstProfile(baseline, candidate, profile);
+  const summary = error
+    ? {
+        improved: 0,
+        regressed: 0,
+        unchanged: 0,
+        missing: 0
+      }
+    : summarizeComparisons(comparisons);
 
   console.log(
     JSON.stringify(
@@ -45,19 +66,22 @@ async function main(): Promise<void> {
         baselineKind: profile.baselineKind,
         baseline: baselinePath,
         candidate: candidatePath,
+        baselineRuntime,
+        candidateRuntime,
         recommended: {
           iterations: profile.recommendedIterations,
           warmupIterations: profile.recommendedWarmupIterations
         },
         summary,
-        comparisons
+        comparisons,
+        ...(error ? { error } : {})
       },
       null,
       2
     )
   );
 
-  if (summary.regressed > 0 || summary.missing > 0) {
+  if (error || summary.regressed > 0 || summary.missing > 0) {
     process.exitCode = 1;
   }
 }
@@ -103,6 +127,46 @@ async function readBenchReport(path: string): Promise<BenchReport> {
   const payload = await readFile(path, "utf8");
 
   return JSON.parse(payload) as BenchReport;
+}
+
+function toRuntimeDescriptor(report: BenchReport): BenchRuntimeDescriptor {
+  return {
+    version: report.node.version,
+    platform: report.node.platform,
+    arch: report.node.arch
+  };
+}
+
+function resolveCompatibilityError(
+  baseline: BenchReport,
+  candidate: BenchReport,
+  profile: BenchProfile
+): BenchCheckError | undefined {
+  const mismatches: string[] = [];
+
+  if (baseline.node.platform !== candidate.node.platform) {
+    mismatches.push(
+      `platform baseline=${baseline.node.platform} candidate=${candidate.node.platform}`
+    );
+  }
+
+  if (baseline.node.arch !== candidate.node.arch) {
+    mismatches.push(`arch baseline=${baseline.node.arch} candidate=${candidate.node.arch}`);
+  }
+
+  if (mismatches.length === 0) {
+    return undefined;
+  }
+
+  return {
+    code: "incompatible_runtime",
+    message:
+      `Profile ${profile.name} requires runner-compatible artifacts. ` +
+      `Approval baselines are runner-specific, but this check compared different runtimes ` +
+      `(${mismatches.join(", ")}). Regenerate the baseline on ` +
+      `${candidate.node.platform}/${candidate.node.arch} or choose a baseline captured ` +
+      `on the same runner family as the candidate artifact.`
+  };
 }
 
 function compareAgainstProfile(

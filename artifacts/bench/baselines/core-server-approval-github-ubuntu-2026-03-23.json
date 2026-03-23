@@ -1,0 +1,416 @@
+{
+  "benchmark": "core-server",
+  "generatedAt": "2026-03-23T04:03:56.022Z",
+  "node": {
+    "version": "v24.14.0",
+    "platform": "linux",
+    "arch": "x64",
+    "pid": 2588
+  },
+  "options": {
+    "iterations": 10,
+    "warmupIterations": 3,
+    "outputDir": "artifacts/bench/approval"
+  },
+  "scenarios": [
+    {
+      "name": "stdio.inline_tool_call.editor_state_read",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 0.25974699999994755,
+        "max": 0.5718399999999519,
+        "mean": 0.415495999999996,
+        "p50": 0.43873099999996157,
+        "p95": 0.5718399999999519
+      },
+      "eventLoopDelayMs": {
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "p95": 0
+      },
+      "memory": {
+        "before": {
+          "rss": 153690112,
+          "heapTotal": 62623744,
+          "heapUsed": 28404232,
+          "external": 4964988,
+          "arrayBuffers": 1085207,
+          "availableMemory": 15570341888
+        },
+        "after": {
+          "rss": 153690112,
+          "heapTotal": 62885888,
+          "heapUsed": 29170304,
+          "external": 4981412,
+          "arrayBuffers": 1101591,
+          "availableMemory": 15570341888
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 5820,
+        "systemCPUTime": 103,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 15,
+        "involuntaryContextSwitches": 1,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        0.49398500000006607,
+        0.457176000000004,
+        0.4459349999999631,
+        0.43873099999996157,
+        0.549980000000005,
+        0.5718399999999519,
+        0.3501660000000584,
+        0.25974699999994755,
+        0.29482199999995373,
+        0.29257800000004863
+      ]
+    },
+    {
+      "name": "http.initialize_and_inline_tool_call.editor_state_read",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 3.1184389999999667,
+        "max": 4.799725999999964,
+        "mean": 3.762655799999993,
+        "p50": 3.647980999999959,
+        "p95": 4.799725999999964
+      },
+      "eventLoopDelayMs": {
+        "min": 10.248192,
+        "max": 10.428415,
+        "mean": 10.338304,
+        "p95": 10.428415
+      },
+      "memory": {
+        "before": {
+          "rss": 177717248,
+          "heapTotal": 63410176,
+          "heapUsed": 33244208,
+          "external": 5225627,
+          "arrayBuffers": 1168688,
+          "availableMemory": 15554088960
+        },
+        "after": {
+          "rss": 168456192,
+          "heapTotal": 64458752,
+          "heapUsed": 39136496,
+          "external": 5276789,
+          "arrayBuffers": 1219850,
+          "availableMemory": 15554101248
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 76772,
+        "systemCPUTime": 8058,
+        "maxRSS": 2720,
+        "voluntaryContextSwitches": 117,
+        "involuntaryContextSwitches": 0,
+        "fsRead": 24,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        4.799725999999964,
+        4.289030000000025,
+        3.425173000000086,
+        3.7640579999999773,
+        3.647980999999959,
+        3.8565699999999197,
+        3.5485740000000305,
+        3.9021360000000413,
+        3.274870999999962,
+        3.1184389999999667
+      ]
+    },
+    {
+      "name": "http.task_lifecycle.editor_state_read",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 5.094488999999953,
+        "max": 7.872059000000036,
+        "mean": 5.577221899999984,
+        "p50": 5.197600999999963,
+        "p95": 7.872059000000036
+      },
+      "eventLoopDelayMs": {
+        "min": 9.58464,
+        "max": 10.305535,
+        "mean": 9.959424,
+        "p95": 10.305535
+      },
+      "memory": {
+        "before": {
+          "rss": 168980480,
+          "heapTotal": 65019904,
+          "heapUsed": 43090968,
+          "external": 5306158,
+          "arrayBuffers": 1249219,
+          "availableMemory": 15554101248
+        },
+        "after": {
+          "rss": 170160128,
+          "heapTotal": 66330624,
+          "heapUsed": 43231408,
+          "external": 5297046,
+          "arrayBuffers": 1240107,
+          "availableMemory": 15554101248
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 69240,
+        "systemCPUTime": 2932,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 159,
+        "involuntaryContextSwitches": 3,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        7.872059000000036,
+        5.594293999999991,
+        5.424735999999939,
+        5.16250500000001,
+        5.197600999999963,
+        5.715731000000005,
+        5.434273999999959,
+        5.1725040000000035,
+        5.104025999999976,
+        5.094488999999953
+      ]
+    },
+    {
+      "name": "http.task_result_sse.completed_stream.editor_state_read",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 28.132090000000062,
+        "max": 29.950906000000032,
+        "mean": 29.081495100000005,
+        "p50": 29.022767000000158,
+        "p95": 29.950906000000032
+      },
+      "eventLoopDelayMs": {
+        "min": 9.396224,
+        "max": 10.854399,
+        "mean": 10.137903407407407,
+        "p95": 10.747903
+      },
+      "memory": {
+        "before": {
+          "rss": 172781568,
+          "heapTotal": 69214208,
+          "heapUsed": 37739792,
+          "external": 5255616,
+          "arrayBuffers": 1198677,
+          "availableMemory": 15553843200
+        },
+        "after": {
+          "rss": 173043712,
+          "heapTotal": 69476352,
+          "heapUsed": 46586240,
+          "external": 5356252,
+          "arrayBuffers": 1299313,
+          "availableMemory": 15553843200
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 62969,
+        "systemCPUTime": 3763,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 176,
+        "involuntaryContextSwitches": 0,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        29.56328899999994,
+        29.950906000000032,
+        28.18985900000007,
+        28.132090000000062,
+        29.539385999999922,
+        29.78087699999992,
+        29.14114900000004,
+        28.8321719999999,
+        28.66245600000002,
+        29.022767000000158
+      ]
+    },
+    {
+      "name": "http.task_result_sse.replay_after_disconnect.editor_state_read",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 52.927103000000216,
+        "max": 55.16739899999993,
+        "mean": 53.99597150000002,
+        "p50": 53.99903100000006,
+        "p95": 55.16739899999993
+      },
+      "eventLoopDelayMs": {
+        "min": 9.191424,
+        "max": 11.247615,
+        "mean": 10.283610352941176,
+        "p95": 11.059199
+      },
+      "memory": {
+        "before": {
+          "rss": 177369088,
+          "heapTotal": 105652224,
+          "heapUsed": 41590856,
+          "external": 5286636,
+          "arrayBuffers": 1229697,
+          "availableMemory": 15549972480
+        },
+        "after": {
+          "rss": 177770496,
+          "heapTotal": 105914368,
+          "heapUsed": 52650112,
+          "external": 5395162,
+          "arrayBuffers": 1338223,
+          "availableMemory": 15549972480
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 86715,
+        "systemCPUTime": 4965,
+        "maxRSS": 0,
+        "voluntaryContextSwitches": 236,
+        "involuntaryContextSwitches": 1,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        54.852558000000045,
+        53.48242300000015,
+        53.68044400000008,
+        53.37281699999994,
+        55.16739899999993,
+        54.1113499999999,
+        53.99903100000006,
+        54.074251000000004,
+        54.292338999999856,
+        52.927103000000216
+      ]
+    },
+    {
+      "name": "http.task_side_sampling.single_turn.text_only",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 78.76079200000004,
+        "max": 80.46455000000014,
+        "mean": 79.61458069999999,
+        "p50": 79.4769809999998,
+        "p95": 80.46455000000014
+      },
+      "eventLoopDelayMs": {
+        "min": 8.921088,
+        "max": 11.608063,
+        "mean": 10.118981818181819,
+        "p95": 10.657791
+      },
+      "memory": {
+        "before": {
+          "rss": 181702656,
+          "heapTotal": 106176512,
+          "heapUsed": 57668840,
+          "external": 5441376,
+          "arrayBuffers": 1384437,
+          "availableMemory": 15545843712
+        },
+        "after": {
+          "rss": 190746624,
+          "heapTotal": 109060096,
+          "heapUsed": 53454280,
+          "external": 5377424,
+          "arrayBuffers": 1320485,
+          "availableMemory": 15537586176
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 113793,
+        "systemCPUTime": 12679,
+        "maxRSS": 8832,
+        "voluntaryContextSwitches": 320,
+        "involuntaryContextSwitches": 4,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        80.43406400000003,
+        80.00966699999981,
+        79.30057999999963,
+        79.4769809999998,
+        80.46455000000014,
+        79.70257300000003,
+        79.0883160000003,
+        80.10229900000013,
+        78.80598499999996,
+        78.76079200000004
+      ]
+    },
+    {
+      "name": "http.task_side_sampling.tool_loop.two_turn",
+      "iterations": 10,
+      "warmupIterations": 3,
+      "latencyMs": {
+        "min": 153.6525670000001,
+        "max": 156.73522500000036,
+        "mean": 155.0561138000001,
+        "p50": 154.67174399999976,
+        "p95": 156.73522500000036
+      },
+      "eventLoopDelayMs": {
+        "min": 9.183232,
+        "max": 11.411455,
+        "mean": 10.115934315789474,
+        "p95": 10.764287
+      },
+      "memory": {
+        "before": {
+          "rss": 194285568,
+          "heapTotal": 109060096,
+          "heapUsed": 60181568,
+          "external": 5444215,
+          "arrayBuffers": 1387276,
+          "availableMemory": 15537586176
+        },
+        "after": {
+          "rss": 206737408,
+          "heapTotal": 114565120,
+          "heapUsed": 64971752,
+          "external": 5472475,
+          "arrayBuffers": 1415536,
+          "availableMemory": 15542362112
+        }
+      },
+      "resourceUsage": {
+        "userCPUTime": 150665,
+        "systemCPUTime": 11017,
+        "maxRSS": 12160,
+        "voluntaryContextSwitches": 456,
+        "involuntaryContextSwitches": 1,
+        "fsRead": 0,
+        "fsWrite": 0
+      },
+      "samplesMs": [
+        154.67174399999976,
+        153.6525670000001,
+        155.48587700000007,
+        156.61505400000033,
+        154.63152900000023,
+        154.38616199999979,
+        154.96644500000002,
+        153.69711900000038,
+        155.7194159999999,
+        156.73522500000036
+      ]
+    }
+  ]
+}
