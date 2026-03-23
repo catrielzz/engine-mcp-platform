@@ -59,6 +59,7 @@ jobs:
         uses: ./.github/actions/unity/activate-license
         with:
           unityVersion: "2022.3.62f3"
+          unity-license: ${{ secrets.UNITY_LICENSE }}
           unity-email: ${{ secrets.UNITY_EMAIL }}
           unity-password: ${{ secrets.UNITY_PASSWORD }}
 
@@ -81,9 +82,6 @@ jobs:
 
       - name: Test Unity Installer (EditMode)
         uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: ./Installer
           unityVersion: 2022.3.62f3
@@ -107,9 +105,6 @@ jobs:
 
       - name: Export Unity Package
         uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: ./Installer
           unityVersion: 2022.3.62f3
