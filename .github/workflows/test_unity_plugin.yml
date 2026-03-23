@@ -81,12 +81,16 @@ jobs:
         shell: bash
 
       - name: Decode Unity license
+        id: decode_license
         run: |
           echo "$LICENSE_B64" | base64 -d > /tmp/unity_license.ulf
           DELIM="UNITY_LIC_EOF_$(openssl rand -hex 16)"
           echo "UNITY_LICENSE<<$DELIM" >> "$GITHUB_ENV"
           cat /tmp/unity_license.ulf >> "$GITHUB_ENV"
           printf '\n%s\n' "$DELIM" >> "$GITHUB_ENV"
+          echo "unity_license<<$DELIM" >> "$GITHUB_OUTPUT"
+          cat /tmp/unity_license.ulf >> "$GITHUB_OUTPUT"
+          printf '\n%s\n' "$DELIM" >> "$GITHUB_OUTPUT"
         env:
           LICENSE_B64: ${{ steps.activate.outputs.license }}
         shell: bash
@@ -101,7 +105,7 @@ jobs:
           artifactsPath: artifacts-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.platform }}
           customParameters: -CI true -GITHUB_ACTIONS true
         env:
-          UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
+          UNITY_LICENSE: ${{ steps.decode_license.outputs.unity_license }}
 
       # --------------------------------------------------------------------- #
       - uses: actions/upload-artifact@v6
