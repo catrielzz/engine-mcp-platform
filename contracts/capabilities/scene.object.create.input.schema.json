@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.create.input.schema.json",
+  "title": "scene.object.create input",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "container": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "parent": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "name": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "kind": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "transform": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/transform3D"
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/componentPatch"
+      }
+    },
+    "labels": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/stringList"
+    },
+    "setActive": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

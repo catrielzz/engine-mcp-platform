@@ -1,0 +1,15 @@
+{
+  "$schema": "https://engine-mcp-platform.local/contracts/schemas/capability-catalog.schema.json",
+  "slice": "experimental",
+  "version": "0.1.0",
+  "capabilities": [
+    {
+      "capability": "snapshot.restore",
+      "operationClass": "destructive",
+      "status": "bootstrap",
+      "summary": "Restore a previously captured snapshot in a supported sandbox.",
+      "inputSchema": "https://engine-mcp-platform.local/contracts/capabilities/snapshot.restore.input.schema.json",
+      "outputSchema": "https://engine-mcp-platform.local/contracts/capabilities/snapshot.restore.output.schema.json"
+    }
+  ]
+}

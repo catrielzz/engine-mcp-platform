@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/snapshot.restore.output.schema.json",
+  "title": "snapshot.restore output",
+  "type": "object",
+  "required": ["snapshotId", "restored"],
+  "properties": {
+    "snapshotId": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    },
+    "restored": {
+      "type": "boolean"
+    },
+    "target": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    }
+  },
+  "additionalProperties": false
+}

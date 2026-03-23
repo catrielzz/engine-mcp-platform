@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.create.output.schema.json",
+  "title": "scene.object.create output",
+  "type": "object",
+  "required": ["object", "created"],
+  "properties": {
+    "object": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "container": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "created": {
+      "type": "boolean"
+    },
+    "transform": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/transform3D"
+    },
+    "appliedComponents": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/stringList"
+    }
+  },
+  "additionalProperties": false
+}

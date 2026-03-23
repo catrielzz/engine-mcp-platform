@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/scene.hierarchy.read.input.schema.json",
+  "title": "scene.hierarchy.read input",
+  "type": "object",
+  "properties": {
+    "container": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "depth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "includeComponents": {
+      "type": "boolean"
+    },
+    "includeInactive": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

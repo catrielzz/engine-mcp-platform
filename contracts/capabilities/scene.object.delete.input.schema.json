@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/scene.object.delete.input.schema.json",
+  "title": "scene.object.delete input",
+  "type": "object",
+  "required": ["target"],
+  "properties": {
+    "target": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "allowMissing": {
+      "type": "boolean"
+    },
+    "snapshotLabel": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+    }
+  },
+  "additionalProperties": false
+}

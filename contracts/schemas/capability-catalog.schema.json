@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/schemas/capability-catalog.schema.json",
+  "title": "Capability Catalog",
+  "type": "object",
+  "required": ["slice", "version", "capabilities"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://engine-mcp-platform.local/contracts/schemas/capability-catalog.schema.json"
+    },
+    "slice": {
+      "type": "string",
+      "pattern": "^[a-z0-9._-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "capability",
+          "operationClass",
+          "status",
+          "summary",
+          "inputSchema",
+          "outputSchema"
+        ],
+        "properties": {
+          "capability": {
+            "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/capabilityId"
+          },
+          "operationClass": {
+            "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/operationClass"
+          },
+          "status": {
+            "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/contractStatus"
+          },
+          "summary": {
+            "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/nonEmptyString"
+          },
+          "inputSchema": {
+            "type": "string",
+            "pattern": "^https://engine-mcp-platform\\.local/contracts/capabilities/.+\\.input\\.schema\\.json$"
+          },
+          "outputSchema": {
+            "type": "string",
+            "pattern": "^https://engine-mcp-platform\\.local/contracts/capabilities/.+\\.output\\.schema\\.json$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

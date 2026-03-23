@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engine-mcp-platform.local/contracts/capabilities/scene.hierarchy.read.output.schema.json",
+  "title": "scene.hierarchy.read output",
+  "$defs": {
+    "hierarchyNode": {
+      "type": "object",
+      "required": ["object", "children"],
+      "properties": {
+        "object": {
+          "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "labels": {
+          "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/stringList"
+        },
+        "components": {
+          "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/stringList"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hierarchyNode"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": ["roots"],
+  "properties": {
+    "container": {
+      "$ref": "https://engine-mcp-platform.local/contracts/schemas/common.schema.json#/$defs/entityRef"
+    },
+    "roots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hierarchyNode"
+      }
+    }
+  },
+  "additionalProperties": false
+}
