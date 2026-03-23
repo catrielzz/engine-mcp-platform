@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -87,3 +88,4 @@ namespace EngineMcp.Unity.Plugin.Protocol
         public string Text { get; set; } = string.Empty;
     }
 }
+#nullable restore

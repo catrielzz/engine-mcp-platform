@@ -1,5 +1,9 @@
 import { TARGET_OUTSIDE_SANDBOX_POLICY_REASON } from "@engine-mcp/policy-engine";
 import { afterEach, describe, expect, it } from "vitest";
+import {
+  ENGINE_SNAPSHOT_INDEX_RESOURCE_URI,
+  ENGINE_TEST_CATALOG_RESOURCE_URI
+} from "@engine-mcp/contracts";
 
 import {
   createReadHeavyConformanceCases,
@@ -18,6 +22,7 @@ import {
   createUnityLocalBridgeErrorResponse,
   createUnityLocalBridgeSuccessResponse,
   getDefaultUnityPluginSessionBootstrapPath,
+  parseUnityLocalBridgeRequestEnvelope,
   parseUnityLocalBridgeRequest
 } from "./index.js";
 import { createUnityBridgeBootstrapHarness } from "./test-support/bootstrap.js";
@@ -361,6 +366,287 @@ describe("@engine-mcp/unity-bridge plugin proxy adapter", () => {
         namePattern: "Sandbox"
       }
     });
+  });
+
+  it("returns an empty snapshot catalog when the live plugin does not expose snapshot discovery", async () => {
+    const fixture = await createPluginProxyTestFixture({
+      sessionScope: "dangerous_write",
+      responder: async (_request, body) => {
+        const envelope = parseUnityLocalBridgeRequestEnvelope(body);
+
+        if ("requestType" in envelope && envelope.requestType === "resource.read") {
+          return createUnityLocalBridgeErrorResponse(envelope.requestId, {
+            code: "target_not_found",
+            message: "resource_not_found",
+            details: {
+              uri: envelope.uri
+            }
+          });
+        }
+
+        return createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+          snapshotId: "snapshot-live-001",
+          restored: true,
+          target: {
+            logicalName: "SandboxRoot/MCP_E2E__DeletedCube",
+            displayName: "MCP_E2E__DeletedCube"
+          }
+        });
+      }
+    });
+
+    await fixture.adapter.invoke({
+      capability: "snapshot.restore",
+      input: {
+        snapshotId: "snapshot-live-001"
+      }
+    });
+
+    await expect(
+      fixture.adapter.completePromptArgument({
+        promptName: "snapshot.restore.workflow",
+        argumentName: "snapshot_id",
+        provider: "engine.snapshot_id",
+        value: "live"
+      })
+    ).resolves.toEqual([]);
+
+    await expect(fixture.adapter.readResource(ENGINE_SNAPSHOT_INDEX_RESOURCE_URI)).resolves.toMatchObject({
+      uri: ENGINE_SNAPSHOT_INDEX_RESOURCE_URI
+    });
+    await expect(fixture.adapter.readResource(ENGINE_SNAPSHOT_INDEX_RESOURCE_URI)).resolves.toSatisfy(
+      (resource) =>
+        JSON.parse(resource?.text ?? "{}").snapshots?.length === 0
+    );
+  });
+
+  it("reads live snapshot discovery through explicit resource.read requests before any observed rollback", async () => {
+    const fixture = await createPluginProxyTestFixture({
+      responder: async (_request, body) => {
+        const envelope = parseUnityLocalBridgeRequestEnvelope(body);
+
+        if ("requestType" in envelope && envelope.requestType === "resource.read") {
+          return createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+            uri: envelope.uri,
+            mimeType: "application/vnd.engine-mcp.discovery+json",
+            text: JSON.stringify({
+              adapterId: "unity-bridge-plugin-proxy",
+              snapshots: ["snapshot-explicit-001", "snapshot-explicit-002"]
+            })
+          });
+        }
+
+        return createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+          engine: "Unity",
+          engineVersion: "6000.3.11f1",
+          workspaceName: "Unity-Tests",
+          isReady: true,
+          activity: "idle",
+          selectionCount: 0,
+          activeContainer: {
+            displayName: "MCP_Sandbox",
+            enginePath: "Assets/MCP_Sandbox/Scenes/MCP_Sandbox.unity"
+          },
+          diagnostics: []
+        });
+      }
+    });
+
+    await expect(
+      fixture.adapter.completePromptArgument({
+        promptName: "snapshot.restore.workflow",
+        argumentName: "snapshot_id",
+        provider: "engine.snapshot_id",
+        value: "explicit"
+      })
+    ).resolves.toEqual(["snapshot-explicit-001", "snapshot-explicit-002"]);
+
+    await expect(fixture.adapter.readResource(ENGINE_SNAPSHOT_INDEX_RESOURCE_URI)).resolves.toSatisfy(
+      (resource) =>
+        JSON.parse(resource?.text ?? "{}").snapshots?.includes("snapshot-explicit-001") === true
+    );
+  });
+
+  it("returns an empty test catalog when the live plugin does not expose test discovery", async () => {
+    const fixture = await createPluginProxyTestFixture({
+      responder: async (_request, body) => {
+        const envelope = parseUnityLocalBridgeRequestEnvelope(body);
+
+        if ("requestType" in envelope && envelope.requestType === "resource.read") {
+          return createUnityLocalBridgeErrorResponse(envelope.requestId, {
+            code: "target_not_found",
+            message: "resource_not_found",
+            details: {
+              uri: envelope.uri
+            }
+          });
+        }
+
+        return createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+          jobId: "job-live-001",
+          status: "completed",
+          progress: 1,
+          summary: {
+            passed: 2,
+            failed: 0,
+            skipped: 0
+          },
+          results: [
+            {
+              name: "Gameplay.EditMode.CheckpointTests.CreatesMarker",
+              status: "passed"
+            },
+            {
+              name: "Gameplay.PlayMode.CheckpointTests.RestoresSnapshot",
+              status: "passed"
+            }
+          ]
+        });
+      }
+    });
+
+    await fixture.adapter.invoke({
+      capability: "test.job.read",
+      input: {
+        jobId: "job-live-001"
+      }
+    });
+
+    await expect(
+      fixture.adapter.completePromptArgument({
+        promptName: "test.failure.triage",
+        argumentName: "failing_test",
+        provider: "engine.test_name",
+        value: "checkpoint"
+      })
+    ).resolves.toEqual([]);
+
+    await expect(fixture.adapter.readResource(ENGINE_TEST_CATALOG_RESOURCE_URI)).resolves.toMatchObject({
+      uri: ENGINE_TEST_CATALOG_RESOURCE_URI
+    });
+    await expect(fixture.adapter.readResource(ENGINE_TEST_CATALOG_RESOURCE_URI)).resolves.toSatisfy(
+      (resource) =>
+        JSON.parse(resource?.text ?? "{}").tests?.length === 0
+    );
+  });
+
+  it("returns empty discovery values when the live plugin does not support resource.read", async () => {
+    const fixture = await createPluginProxyTestFixture({
+      sessionScope: "dangerous_write",
+      responder: async () => ({ ok: true }),
+      fetchFn: async (_input, init) => {
+        const body = String(init?.body ?? "");
+
+        if (body.includes('"requestType":"resource.read"')) {
+          return new Response("resource.read unsupported", {
+            status: 500,
+            headers: {
+              "content-type": "text/plain; charset=utf-8"
+            }
+          });
+        }
+
+        const envelope = parseUnityLocalBridgeRequest(body);
+
+        return new Response(
+          JSON.stringify(
+            createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+              snapshotId: "snapshot-fallback-001",
+              restored: true,
+              target: {
+                logicalName: "SandboxRoot/MCP_E2E__DeletedCube",
+                displayName: "MCP_E2E__DeletedCube"
+              }
+            })
+          ),
+          {
+            status: 200,
+            headers: {
+              "content-type": "application/json"
+            }
+          }
+        );
+      }
+    });
+
+    await fixture.adapter.invoke({
+      capability: "snapshot.restore",
+      input: {
+        snapshotId: "snapshot-fallback-001"
+      }
+    });
+
+    await expect(
+      fixture.adapter.completePromptArgument({
+        promptName: "snapshot.restore.workflow",
+        argumentName: "snapshot_id",
+        provider: "engine.snapshot_id",
+        value: "fallback"
+      })
+    ).resolves.toEqual([]);
+    await expect(fixture.adapter.readResource(ENGINE_SNAPSHOT_INDEX_RESOURCE_URI)).resolves.toSatisfy(
+      (resource) =>
+        JSON.parse(resource?.text ?? "{}").snapshots?.length === 0
+    );
+  });
+
+  it("does not fall back to synthetic discovery values when the live preferred adapter is healthy", async () => {
+    const fixture = await createPluginProxyTestFixture({
+      responder: async (_request, body) => {
+        const envelope = parseUnityLocalBridgeRequestEnvelope(body);
+
+        if ("requestType" in envelope && envelope.requestType === "resource.read") {
+          return createUnityLocalBridgeErrorResponse(envelope.requestId, {
+            code: "target_not_found",
+            message: "resource_not_found",
+            details: {
+              uri: envelope.uri
+            }
+          });
+        }
+
+        return createUnityLocalBridgeSuccessResponse(envelope.requestId, {
+          engine: "Unity",
+          engineVersion: "6000.3.11f1",
+          workspaceName: "Unity-Tests",
+          isReady: true,
+          activity: "idle",
+          selectionCount: 0,
+          activeContainer: {
+            displayName: "MCP_Sandbox",
+            enginePath: "Assets/MCP_Sandbox/Scenes/MCP_Sandbox.unity"
+          },
+          diagnostics: []
+        });
+      }
+    });
+    const adapter = createUnityBridgePreferredAdapter({
+      proxy: {
+        bootstrapFilePath: fixture.bootstrapFilePath,
+        sessionScope: "inspect"
+      },
+      sandbox: {
+        sceneName: "FallbackScene"
+      }
+    });
+
+    await adapter.invoke({
+      capability: "editor.state.read",
+      input: {
+        includeSelection: true,
+        includeActiveContainer: true,
+        includeDiagnostics: true
+      }
+    });
+
+    await expect(
+      adapter.completePromptArgument({
+        promptName: "snapshot.restore.workflow",
+        argumentName: "snapshot_id",
+        provider: "engine.snapshot_id",
+        value: ""
+      })
+    ).resolves.toEqual([]);
   });
 
   it("forwards console.read and validates the canonical output shape", async () => {
