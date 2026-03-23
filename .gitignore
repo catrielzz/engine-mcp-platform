@@ -30,6 +30,7 @@ Unity-MCP.wiki
 # JS/TS platform workspace
 **/node_modules/
 **/package-lock.json
+!cli/package-lock.json
 .pnpm-store/
 .turbo/
 coverage/
