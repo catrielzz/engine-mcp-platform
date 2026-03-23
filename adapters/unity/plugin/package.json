@@ -1,0 +1,21 @@
+{
+  "name": "com.engine-mcp.unity-plugin",
+  "version": "0.1.0",
+  "displayName": "Engine MCP Unity Plugin",
+  "description": "Unity-side plugin scaffold and local bridge contract for the Engine MCP Platform.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.2",
+    "com.unity.test-framework": "1.6.0"
+  },
+  "author": {
+    "name": "Engine MCP Platform"
+  },
+  "keywords": [
+    "mcp",
+    "unity",
+    "automation",
+    "editor",
+    "bridge"
+  ]
+}
