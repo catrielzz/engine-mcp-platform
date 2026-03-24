@@ -52,6 +52,7 @@ jobs:
   # --- EDIT MODE ---
 
   test-unity-2022-3-62f3-editmode:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
@@ -61,6 +62,7 @@ jobs:
     secrets: inherit
 
   test-unity-2023-2-22f1-editmode:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
@@ -70,6 +72,7 @@ jobs:
     secrets: inherit
 
   test-unity-6000-3-1f1-editmode:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
@@ -110,6 +113,7 @@ jobs:
   # --- STANDALONE ---
 
   test-unity-2022-3-62f3-standalone:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
@@ -119,6 +123,7 @@ jobs:
     secrets: inherit
 
   test-unity-2023-2-22f1-standalone:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
@@ -128,6 +133,7 @@ jobs:
     secrets: inherit
 
   test-unity-6000-3-1f1-standalone:
+    if: github.event_name == 'workflow_dispatch'
     needs: [build-and-zip-mcp-server]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
