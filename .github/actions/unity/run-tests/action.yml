@@ -9,7 +9,7 @@ inputs:
     description: Requested Unity version key for editor resolution.
     required: true
   test-mode:
-    description: Unity test mode. Supported values: editmode, playmode, standalone.
+    description: "Unity test mode. Supported values: editmode, playmode, standalone."
     required: true
   unity-editor-path:
     description: Optional explicit path to Unity.exe.
