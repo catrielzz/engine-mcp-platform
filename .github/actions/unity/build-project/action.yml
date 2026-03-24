@@ -1,0 +1,45 @@
+name: unity-build-project
+description: Run a Unity executeMethod build/export directly on a self-hosted Windows runner using a local Unity installation.
+
+inputs:
+  project-path:
+    description: Relative or absolute path to the Unity project.
+    required: true
+  unity-version:
+    description: Requested Unity version key for editor resolution.
+    required: true
+  build-method:
+    description: Fully-qualified Unity static method to execute with -executeMethod.
+    required: true
+  unity-editor-path:
+    description: Optional explicit path to Unity.exe.
+    required: false
+  builds-path:
+    description: Directory for build logs and outputs.
+    required: false
+  build-output-path:
+    description: Expected build artifact path relative to the workspace root.
+    required: false
+  custom-parameters:
+    description: Optional extra Unity command line parameters.
+    required: false
+
+outputs:
+  builds-path:
+    description: Absolute path to the build directory.
+  build-output-path:
+    description: Absolute path to the expected build artifact output.
+  log-path:
+    description: Absolute path to the Unity build log file.
+  summary-path:
+    description: Absolute path to the action summary JSON file.
+  unity-editor-path:
+    description: Resolved Unity.exe path used by the action.
+  unity-editor-version:
+    description: Resolved Unity editor version used by the action.
+  license-strategy:
+    description: Reported Unity CI license strategy for this run.
+
+runs:
+  using: node20
+  main: dist/index.js

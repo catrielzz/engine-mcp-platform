@@ -7,6 +7,6 @@ export default defineConfig({
   test: {
     ...workspaceVitestBaseConfig.test,
     name: "platform-packages",
-    include: ["packages/*/src/**/*.test.ts", "adapters/*/bridge/src/**/*.test.ts"]
+    include: ["packages/*/src/**/*.test.ts", "adapters/*/bridge/src/**/*.test.ts", "scripts/ci/**/*.test.ts"]
   }
 });
