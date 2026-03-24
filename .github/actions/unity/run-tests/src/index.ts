@@ -6,7 +6,7 @@ import { buildUnityRunTestsArgs, deriveUnityTestArtifactPaths } from "../../../.
 import { resolveWindowsUnityEditorPath } from "../../../../../scripts/ci/unity/host-unity.js";
 
 function getInput(name: string): string {
-  return (process.env[`INPUT_${name.replace(/ /g, "_").replace(/-/g, "_").toUpperCase()}`] ?? "").trim();
+  return (process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] ?? "").trim();
 }
 
 function getRequiredInput(name: string): string {

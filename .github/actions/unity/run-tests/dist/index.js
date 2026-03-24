@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 import { buildUnityRunTestsArgs, deriveUnityTestArtifactPaths } from "../../../../../scripts/ci/unity/run-tests.js";
 import { resolveWindowsUnityEditorPath } from "../../../../../scripts/ci/unity/host-unity.js";
 function getInput(name) {
-    return (process.env[`INPUT_${name.replace(/ /g, "_").replace(/-/g, "_").toUpperCase()}`] ?? "").trim();
+    return (process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] ?? "").trim();
 }
 function getRequiredInput(name) {
     const value = getInput(name);

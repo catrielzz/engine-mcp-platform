@@ -9,7 +9,7 @@ import {
 } from "../../../../../scripts/ci/unity/build-project.js";
 
 function getInput(name: string): string {
-  return (process.env[`INPUT_${name.replace(/ /g, "_").replace(/-/g, "_").toUpperCase()}`] ?? "").trim();
+  return (process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] ?? "").trim();
 }
 
 function getRequiredInput(name: string): string {

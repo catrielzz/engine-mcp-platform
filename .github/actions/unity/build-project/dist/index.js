@@ -3,7 +3,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { buildUnityExecuteMethodArgs, deriveUnityBuildArtifactPaths, resolveWindowsUnityEditorPath } from "../../../../../scripts/ci/unity/build-project.js";
 function getInput(name) {
-    return (process.env[`INPUT_${name.replace(/ /g, "_").replace(/-/g, "_").toUpperCase()}`] ?? "").trim();
+    return (process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] ?? "").trim();
 }
 function getRequiredInput(name) {
     const value = getInput(name);
