@@ -7,12 +7,16 @@
 # └──────────────────────────────────────────────────────────────────┘
 
 name: "Unity Activate License"
-description: "Activate a Unity Personal license via unity-license-activate and output the ULF content"
+description: "Use a provided Unity ULF license or activate one via unity-license-activate and output the ULF content"
 
 inputs:
   unityVersion:
     description: "Unity version to activate (e.g. 2022.3.62f3)"
     required: true
+  unity-license:
+    description: "Unity license file content (ULF XML). If provided, skips web activation."
+    required: false
+    default: ""
   unity-email:
     description: "Unity account email"
     required: false
@@ -25,22 +29,25 @@ inputs:
 outputs:
   license:
     description: "Unity license file content (ULF XML, base64-encoded)"
-    value: ${{ steps.ulf.outputs.content }}
+    value: ${{ steps.resolve.outputs.content }}
 
 runs:
   using: "composite"
   steps:
     - name: Setup Node.js
+      if: inputs.unity-license == ''
       uses: actions/setup-node@v6
       with:
         node-version: "20"
 
     - name: Install unity-license-activate
+      if: inputs.unity-license == ''
       run: npm install --global unity-license-activate@0.3.9
       shell: bash
 
     - name: Generate Unity activation file (.alf)
       id: alf
+      if: inputs.unity-license == ''
       env:
         UNITY_VERSION: ${{ inputs.unityVersion }}
       run: |
@@ -61,8 +68,19 @@ runs:
         echo "alf_path=${ALF_FILE}" >> "$GITHUB_OUTPUT"
       shell: bash
 
+    - name: Use provided Unity license
+      id: inline
+      if: inputs.unity-license != ''
+      env:
+        UNITY_LICENSE_INPUT: ${{ inputs.unity-license }}
+      run: |
+        encoded=$(printf '%s' "$UNITY_LICENSE_INPUT" | base64 -w 0)
+        echo "content=$encoded" >> "$GITHUB_OUTPUT"
+      shell: bash
+
     - name: Activate Unity license
       id: ulf
+      if: inputs.unity-license == ''
       env:
         UNITY_EMAIL: ${{ inputs.unity-email }}
         UNITY_PASSWORD: ${{ inputs.unity-password }}
@@ -99,6 +117,26 @@ runs:
 
         encoded=$(base64 -w 0 "$ULF_FILE")
         echo "content=$encoded" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Resolve Unity license output
+      id: resolve
+      env:
+        INLINE_LICENSE_B64: ${{ steps.inline.outputs.content }}
+        ACTIVATED_LICENSE_B64: ${{ steps.ulf.outputs.content }}
+      run: |
+        if [ -n "$INLINE_LICENSE_B64" ]; then
+          echo "content=$INLINE_LICENSE_B64" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if [ -n "$ACTIVATED_LICENSE_B64" ]; then
+          echo "content=$ACTIVATED_LICENSE_B64" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "No Unity license content was produced."
+        exit 1
       shell: bash
 
     - name: Upload error screenshot

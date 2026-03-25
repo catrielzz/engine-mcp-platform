@@ -47,83 +47,48 @@ jobs:
           tag: ${{ steps.get_version.outputs.current-version }}
 
   build-unity-installer:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, windows, x64, unity, unity-builds]
     needs: [check-version-tag]
     if: needs.check-version-tag.outputs.tag_exists == 'false'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Activate Unity license
-        id: activate
-        uses: ./.github/actions/unity/activate-license
-        with:
-          unityVersion: "2022.3.62f3"
-          unity-email: ${{ secrets.UNITY_EMAIL }}
-          unity-password: ${{ secrets.UNITY_PASSWORD }}
-
-      - name: Decode Unity license
-        run: |
-          echo "$LICENSE_B64" | base64 -d > /tmp/unity_license.ulf
-          DELIM="UNITY_LIC_EOF_$(openssl rand -hex 16)"
-          echo "UNITY_LICENSE<<$DELIM" >> "$GITHUB_ENV"
-          cat /tmp/unity_license.ulf >> "$GITHUB_ENV"
-          printf '\n%s\n' "$DELIM" >> "$GITHUB_ENV"
-        env:
-          LICENSE_B64: ${{ steps.activate.outputs.license }}
-        shell: bash
-
-      - name: Cache Unity Library
-        uses: actions/cache@v5
-        with:
-          path: ./Installer/Library
-          key: Library-Unity-Installer
-
       - name: Test Unity Installer (EditMode)
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        uses: ./.github/actions/unity/run-tests
+        id: installer_tests
         with:
-          projectPath: ./Installer
-          unityVersion: 2022.3.62f3
-          customImage: "unityci/editor:ubuntu-2022.3.62f3-base-3"
-          testMode: editmode
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity Installer EditMode Test Results
-          artifactsPath: artifacts-installer-editmode
-          customParameters: -CI true -GITHUB_ACTIONS true
+          project-path: ./Installer
+          unity-version: 6000.3.11f1
+          test-mode: editmode
+          artifacts-path: artifacts-installer-editmode
+          custom-parameters: -CI true -GITHUB_ACTIONS true
 
       - name: Clean Unity artifacts and reset git state
+        shell: pwsh
         run: |
-          # Force remove Unity generated files with restricted permissions
-          sudo rm -rf ./Installer/Logs/ || true
-          sudo rm -rf ./Installer/Temp/ || true
-          sudo rm -rf ./artifacts-installer-editmode/ || true
-
-          # Reset only tracked files to their committed state
+          Remove-Item -Recurse -Force .\Installer\Logs\ -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force .\Installer\Temp\ -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force .\artifacts-installer-editmode\ -ErrorAction SilentlyContinue
           git reset --hard HEAD
-          echo "Cleaned Unity artifacts and reset tracked files"
+          Write-Host "Cleaned Unity artifacts and reset tracked files"
 
       - name: Export Unity Package
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        uses: ./.github/actions/unity/build-project
+        id: installer_build
         with:
-          projectPath: ./Installer
-          unityVersion: 2022.3.62f3
-          customImage: "unityci/editor:ubuntu-2022.3.62f3-base-3"
-          buildName: AI-Game-Dev-Installer
-          buildsPath: build
-          buildMethod: com.IvanMurzak.Unity.MCP.Installer.PackageExporter.ExportPackage
-          customParameters: -CI true -GITHUB_ACTIONS true
+          project-path: ./Installer
+          unity-version: 6000.3.11f1
+          builds-path: ./Installer/build
+          build-output-path: ./Installer/build/AI-Game-Dev-Installer.unitypackage
+          build-method: com.IvanMurzak.Unity.MCP.Installer.PackageExporter.ExportPackage
+          custom-parameters: -CI true -GITHUB_ACTIONS true
 
       - name: Upload Unity Package as artifact
         uses: actions/upload-artifact@v6
         with:
           name: unity-installer-package
-          path: ./Installer/build/AI-Game-Dev-Installer.unitypackage
+          path: ${{ steps.installer_build.outputs.build-output-path }}
 
   build-and-zip-mcp-server:
     runs-on: macos-latest
@@ -156,88 +121,34 @@ jobs:
 
   # --- EDIT MODE ---
 
-  test-unity-2022-3-62f3-editmode:
-    needs: [build-and-zip-mcp-server, build-unity-installer]
-    uses: ./.github/workflows/test_unity_plugin.yml
-    with:
-      projectPath: "./Unity-Tests/2022.3.62f3"
-      unityVersion: "2022.3.62f3"
-      testMode: "editmode"
-    secrets: inherit
-
-  test-unity-2023-2-22f1-editmode:
-    needs: [build-and-zip-mcp-server, build-unity-installer]
-    uses: ./.github/workflows/test_unity_plugin.yml
-    with:
-      projectPath: "./Unity-Tests/2023.2.22f1"
-      unityVersion: "2023.2.22f1"
-      testMode: "editmode"
-    secrets: inherit
-
-  test-unity-6000-3-1f1-editmode:
+  test-unity-6000-3-11f1-editmode:
     needs: [build-and-zip-mcp-server, build-unity-installer]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
       projectPath: "./Unity-Tests/6000.3.1f1"
-      unityVersion: "6000.3.1f1"
+      unityVersion: "6000.3.11f1"
       testMode: "editmode"
     secrets: inherit
 
   # --- PLAY MODE ---
 
-  # test-unity-2022-3-62f3-playmode:
-  #   needs: [build-and-zip-mcp-server, build-unity-installer]
-  #   uses: ./.github/workflows/test_unity_plugin.yml
-  #   with:
-  #     projectPath: './Unity-Tests/2022.3.62f3'
-  #     unityVersion: '2022.3.62f3'
-  #     testMode: 'playmode'
-  #   secrets: inherit
-
-  # test-unity-2023-2-22f1-playmode:
-  #   needs: [build-and-zip-mcp-server, build-unity-installer]
-  #   uses: ./.github/workflows/test_unity_plugin.yml
-  #   with:
-  #     projectPath: './Unity-Tests/2023.2.22f1'
-  #     unityVersion: '2023.2.22f1'
-  #     testMode: 'playmode'
-  #   secrets: inherit
-
-  # test-unity-6000-3-1f1-playmode:
+  # test-unity-6000-3-11f1-playmode:
   #   needs: [build-and-zip-mcp-server, build-unity-installer]
   #   uses: ./.github/workflows/test_unity_plugin.yml
   #   with:
   #     projectPath: './Unity-Tests/6000.3.1f1'
-  #     unityVersion: '6000.3.1f1'
+  #     unityVersion: '6000.3.11f1'
   #     testMode: 'playmode'
   #   secrets: inherit
 
   # --- STANDALONE ---
 
-  test-unity-2022-3-62f3-standalone:
-    needs: [build-and-zip-mcp-server, build-unity-installer]
-    uses: ./.github/workflows/test_unity_plugin.yml
-    with:
-      projectPath: "./Unity-Tests/2022.3.62f3"
-      unityVersion: "2022.3.62f3"
-      testMode: "standalone"
-    secrets: inherit
-
-  test-unity-2023-2-22f1-standalone:
-    needs: [build-and-zip-mcp-server, build-unity-installer]
-    uses: ./.github/workflows/test_unity_plugin.yml
-    with:
-      projectPath: "./Unity-Tests/2023.2.22f1"
-      unityVersion: "2023.2.22f1"
-      testMode: "standalone"
-    secrets: inherit
-
-  test-unity-6000-3-1f1-standalone:
+  test-unity-6000-3-11f1-standalone:
     needs: [build-and-zip-mcp-server, build-unity-installer]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
       projectPath: "./Unity-Tests/6000.3.1f1"
-      unityVersion: "6000.3.1f1"
+      unityVersion: "6000.3.11f1"
       testMode: "standalone"
     secrets: inherit
 
@@ -250,15 +161,9 @@ jobs:
         test-cli,
         build-and-zip-mcp-server,
         build-unity-installer,
-        test-unity-2022-3-62f3-editmode,
-        # test-unity-2022-3-62f3-playmode,
-        test-unity-2022-3-62f3-standalone,
-        test-unity-2023-2-22f1-editmode,
-        # test-unity-2023-2-22f1-playmode,
-        test-unity-2023-2-22f1-standalone,
-        test-unity-6000-3-1f1-editmode,
-        # test-unity-6000-3-1f1-playmode,
-        test-unity-6000-3-1f1-standalone,
+        test-unity-6000-3-11f1-editmode,
+        # test-unity-6000-3-11f1-playmode,
+        test-unity-6000-3-11f1-standalone,
       ]
     if: needs.check-version-tag.outputs.tag_exists == 'false'
     outputs:

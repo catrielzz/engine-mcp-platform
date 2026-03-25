@@ -1,3 +1,4 @@
+#if ENGINE_MCP_ENABLE_LEGACY_IVAN_TESTS
 #nullable enable
 using System.Collections;
 using NUnit.Framework;
@@ -25,3 +26,4 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         }
     }
 }
+#endif

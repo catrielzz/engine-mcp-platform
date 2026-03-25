@@ -35,9 +35,13 @@ Unity-MCP.wiki
 .turbo/
 coverage/
 dist/
+!/.github/actions/**/dist/
+!/.github/actions/**/dist/**
 *.tsbuildinfo
 artifacts/bench/*.json
 artifacts/bench/approval/*.json
 artifacts/bench-smoke/
 artifacts/bench-script-smoke*/
 !artifacts/bench/baselines/*.json
+artifacts/local-unity-action-smoke/
+artifacts/local-unity-validation/

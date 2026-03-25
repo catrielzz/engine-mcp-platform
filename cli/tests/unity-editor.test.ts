@@ -86,10 +86,10 @@ describe('getProjectEditorVersion', () => {
     fs.mkdirSync(projectSettingsDir, { recursive: true });
     fs.writeFileSync(
       path.join(projectSettingsDir, 'ProjectVersion.txt'),
-      'm_EditorVersion: 6000.3.1f1\n'
+      'm_EditorVersion: 6000.3.11f1\n'
     );
     const result = getProjectEditorVersion(tmpDir);
-    expect(result).toBe('6000.3.1f1');
+    expect(result).toBe('6000.3.11f1');
   });
 
   it('trims whitespace from version', () => {
@@ -123,7 +123,7 @@ describe('getProjectEditorVersion (real projects)', () => {
   const testCases = [
     { folder: '2022.3.62f3', expected: '2022.3.62f3' },
     { folder: '2023.2.22f1', expected: '2023.2.22f1' },
-    { folder: '6000.3.1f1', expected: '6000.3.1f1' },
+    { folder: '6000.3.1f1', expected: '6000.3.11f1' },
   ];
 
   for (const { folder, expected } of testCases) {

@@ -1,0 +1,42 @@
+name: unity-run-tests
+description: Run Unity tests directly on a self-hosted Windows runner using a local Unity installation.
+
+inputs:
+  project-path:
+    description: Relative or absolute path to the Unity project.
+    required: true
+  unity-version:
+    description: Requested Unity version key for editor resolution.
+    required: true
+  test-mode:
+    description: "Unity test mode. Supported values: editmode, playmode, standalone."
+    required: true
+  unity-editor-path:
+    description: Optional explicit path to Unity.exe.
+    required: false
+  artifacts-path:
+    description: Optional output directory for logs, XML results, and summary.
+    required: false
+  custom-parameters:
+    description: Optional extra Unity command line parameters.
+    required: false
+
+outputs:
+  artifacts-path:
+    description: Absolute path to the action artifacts directory.
+  results-xml-path:
+    description: Absolute path to the Unity test results XML file.
+  log-path:
+    description: Absolute path to the Unity editor log file.
+  summary-path:
+    description: Absolute path to the action summary JSON file.
+  unity-editor-path:
+    description: Resolved Unity.exe path used by the action.
+  unity-editor-version:
+    description: Resolved Unity editor version used by the action.
+  license-strategy:
+    description: Reported Unity CI license strategy for this run.
+
+runs:
+  using: node20
+  main: dist/index.js

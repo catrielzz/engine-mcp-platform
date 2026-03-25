@@ -1,0 +1,24 @@
+{
+  "name": "EngineMcp.Unity.Plugin.Editor.Tests",
+  "rootNamespace": "EngineMcp.Unity.Plugin.Tests",
+  "references": [
+    "EngineMcp.Unity.Plugin",
+    "EngineMcp.Unity.Plugin.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Newtonsoft.Json.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
