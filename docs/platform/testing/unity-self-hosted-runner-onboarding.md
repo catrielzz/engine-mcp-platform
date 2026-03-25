@@ -138,8 +138,8 @@ Expected Windows shape:
 
 Note:
 
-- the repository's project folder name `Unity-Tests/6000.3.1f1` does not need to match the exact editor folder name
-- CI should trust `ProjectVersion.txt` and the configured editor map, not the project folder name
+- the repository's Unity 6 host project now lives at `Unity-Tests/6000.3.11f1`
+- CI should trust `ProjectVersion.txt` and the configured editor map, not only the project folder name
 
 ## Service And Account Expectations
 

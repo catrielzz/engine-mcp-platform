@@ -31,7 +31,7 @@ From the workspace root:
 ```bash
 pnpm unity:license-spike -- --unity-version 2022.3.62f3 --license-file "C:\\ProgramData\\Unity\\Unity_lic.ulf"
 pnpm unity:license-spike -- --unity-version 2023.2.22f1 --image-platform base --license-file "C:\\ProgramData\\Unity\\Unity_lic.ulf"
-pnpm unity:license-spike -- --unity-version 6000.3.1f1 --image-platform windows-mono --license-file "C:\\ProgramData\\Unity\\Unity_lic.ulf"
+pnpm unity:license-spike -- --unity-version 6000.3.11f1 --image-platform windows-mono --license-file "C:\\ProgramData\\Unity\\Unity_lic.ulf"
 ```
 
 You can also provide the license through `UNITY_LICENSE` instead of `--license-file`.
@@ -39,7 +39,7 @@ You can also provide the license through `UNITY_LICENSE` instead of `--license-f
 Optional flags:
 
 ```bash
-pnpm unity:license-spike -- --unity-version 6000.3.1f1 --project-path "./Unity-Tests/6000.3.1f1" --output-dir artifacts/local-unity-ci-spike/6000-base
+pnpm unity:license-spike -- --unity-version 6000.3.11f1 --project-path "./Unity-Tests/6000.3.11f1" --output-dir artifacts/local-unity-ci-spike/6000-base
 pnpm unity:license-spike -- --unity-version 2022.3.62f3 --keep-temp
 ```
 

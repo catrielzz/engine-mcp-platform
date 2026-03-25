@@ -109,7 +109,7 @@ Expected implementation surfaces:
 - [packages/core-server](E:/engine-mcp-platform/packages/core-server)
 - [packages/contracts](E:/engine-mcp-platform/packages/contracts)
 - [adapters/unity/bridge](E:/engine-mcp-platform/adapters/unity/bridge)
-- [Unity-Tests/6000.3.1f1](E:/engine-mcp-platform/Unity-Tests/6000.3.1f1)
+- [Unity-Tests/6000.3.11f1](E:/engine-mcp-platform/Unity-Tests/6000.3.11f1)
 
 ### Proposed core module split
 
@@ -205,6 +205,13 @@ This slice is done when:
 - keep the first slice sandbox-first
 - prefer explicit structured errors over human-language-only failures
 - do not widen feature surface while the risk model is still undefined
+
+## Current Sub-Slices
+
+- [Journal Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/README.md)
+- [Journal Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/roadmap.md)
+- [Snapshot Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/README.md)
+- [Snapshot Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/roadmap.md)
 
 ## Sources
 

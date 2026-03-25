@@ -26,7 +26,7 @@ Current scope:
 - contract mirror for Node lives in `../bridge/src/plugin-contract.ts`
 - JSON serialization now uses `com.unity.nuget.newtonsoft-json` for Unity-host compatibility
 - package manifest now declares `com.unity.test-framework`
-- package-pure DTO/client/bootstrap tests live under `Tests/Editor`, while `Unity-Tests/6000.3.1f1` is reserved for host/integration coverage and batch execution of both assemblies
+- package-pure DTO/client/bootstrap tests live under `Tests/Editor`, while `Unity-Tests/6000.3.11f1` is reserved for host/integration coverage and batch execution of both assemblies
 
 Out of scope for this slice:
 
@@ -35,7 +35,7 @@ Out of scope for this slice:
 
 ## TDD Host Loop
 
-Use `Unity-Tests/6000.3.1f1` as the stable EditMode host for this package.
+Use `Unity-Tests/6000.3.11f1` as the stable EditMode host for this package.
 
 Batch verification entry point:
 
@@ -44,7 +44,7 @@ $env:ENGINE_MCP_UNITY_BATCH_TEST_RESULTS='E:\engine-mcp-platform\artifacts\unity
 $env:ENGINE_MCP_UNITY_BATCH_TEST_SUMMARY='E:\engine-mcp-platform\artifacts\unity-editmode-summary.txt'
 E:\Unity\Hub\Editor\6000.3.11f1\Editor\Unity.exe `
   -batchmode -nographics `
-  -projectPath E:\engine-mcp-platform\Unity-Tests\6000.3.1f1 `
+  -projectPath E:\engine-mcp-platform\Unity-Tests\6000.3.11f1 `
   -logFile E:\engine-mcp-platform\artifacts\unity-editmode-tests.log `
   -executeMethod EngineMcp.Unity.Plugin.HostTests.EngineMcpBatchTestRunner.RunEditorTests `
   -quit
@@ -55,4 +55,4 @@ The batch runner writes:
 - XML results to `ENGINE_MCP_UNITY_BATCH_TEST_RESULTS`
 - a short textual summary to `ENGINE_MCP_UNITY_BATCH_TEST_SUMMARY`
 
-If those environment variables are not set, the fallback artifact directory is `Unity-Tests/6000.3.1f1/artifacts/`.
+If those environment variables are not set, the fallback artifact directory is `Unity-Tests/6000.3.11f1/artifacts/`.

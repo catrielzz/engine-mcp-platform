@@ -52,7 +52,7 @@ describe('parseInstalledEditorsLine', () => {
 describe('isValidUnityVersion', () => {
   it('accepts standard version formats', () => {
     expect(isValidUnityVersion('2022.3.62f3')).toBe(true);
-    expect(isValidUnityVersion('6000.3.1f1')).toBe(true);
+    expect(isValidUnityVersion('6000.3.11f1')).toBe(true);
     expect(isValidUnityVersion('2023.2.22f1')).toBe(true);
     expect(isValidUnityVersion('2019.4.40f1')).toBe(true);
   });
@@ -69,8 +69,8 @@ describe('isValidUnityVersion', () => {
     expect(isValidUnityVersion('6000.3.1')).toBe(false);
     expect(isValidUnityVersion('6000.3.1f')).toBe(false);
     expect(isValidUnityVersion('foo.bar.bazf1')).toBe(false);
-    expect(isValidUnityVersion('6000.3.1f1; rm -rf /')).toBe(false);
-    expect(isValidUnityVersion('6000.3.1f1\n')).toBe(false);
+    expect(isValidUnityVersion('6000.3.11f1; rm -rf /')).toBe(false);
+    expect(isValidUnityVersion('6000.3.11f1\n')).toBe(false);
   });
 });
 
@@ -90,13 +90,13 @@ describe('findLatestStableRelease', () => {
   it('returns the highest stable version', () => {
     const releases: AvailableRelease[] = [
       { version: '2022.3.10f1', isStable: true },
-      { version: '6000.3.1f1', isStable: true },
+      { version: '6000.3.11f1', isStable: true },
       { version: '2023.2.22f1', isStable: true },
       { version: '6000.4.0a1', isStable: false },
     ];
     const result = findLatestStableRelease(releases);
     expect(result).not.toBeNull();
-    expect(result!.version).toBe('6000.3.1f1');
+    expect(result!.version).toBe('6000.3.11f1');
   });
 
   it('handles single stable release', () => {

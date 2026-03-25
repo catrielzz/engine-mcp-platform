@@ -237,7 +237,7 @@ export function listInstalledEditors(hubPath: string): InstalledEditor[] {
 
 /**
  * Parse a Unity version string into comparable numeric parts.
- * Handles formats like "2022.3.62f1", "6000.3.1f1", "2019.4.40f1".
+ * Handles formats like "2022.3.62f1", "6000.3.11f1", "2019.4.40f1".
  */
 function parseUnityVersion(version: string): number[] {
   // Split on dots and letter boundaries: "2022.3.62f1" -> [2022, 3, 62, 1]
@@ -364,7 +364,7 @@ function fetchUrl(url: string, redirectsRemaining = FETCH_MAX_REDIRECTS): Promis
  * Resolve the changeset hash for a Unity version by scraping the release notes page.
  * Returns the changeset string, or null if not found.
  */
-// Unity version format: major.minor.patchSuffix (e.g. 2022.3.62f3, 6000.3.1f1)
+// Unity version format: major.minor.patchSuffix (e.g. 2022.3.62f3, 6000.3.11f1)
 const UNITY_VERSION_RE = /^\d+\.\d+\.\d+[a-zA-Z]\d+$/;
 
 export function isValidUnityVersion(version: string): boolean {

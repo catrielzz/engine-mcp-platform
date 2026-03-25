@@ -123,7 +123,7 @@ describe('getProjectEditorVersion (real projects)', () => {
   const testCases = [
     { folder: '2022.3.62f3', expected: '2022.3.62f3' },
     { folder: '2023.2.22f1', expected: '2023.2.22f1' },
-    { folder: '6000.3.1f1', expected: '6000.3.11f1' },
+    { folder: '6000.3.11f1', expected: '6000.3.11f1' },
   ];
 
   for (const { folder, expected } of testCases) {

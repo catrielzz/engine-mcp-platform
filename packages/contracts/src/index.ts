@@ -35,6 +35,7 @@ export type {
   JournalActor,
   JournalActorType,
   JournalEntry,
+  JournalRecordedError,
   JournalResult,
   JournalResultStatus,
   JournalSnapshotLink

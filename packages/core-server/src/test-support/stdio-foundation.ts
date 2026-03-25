@@ -3,6 +3,7 @@ import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import type {
   EngineMcpAdapterRegistry,
   EngineMcpCapabilityAdapter,
+  EngineMcpJournalService,
   EngineMcpStdioServerOptions
 } from "../index.js";
 
@@ -17,6 +18,7 @@ export async function createInitializedHarness(
     clientCapabilities?: Record<string, unknown>;
     conformancePreflight?: EngineMcpStdioServerOptions["conformancePreflight"];
     experimentalTasks?: EngineMcpStdioServerOptions["experimentalTasks"];
+    journalService?: EngineMcpJournalService;
     unityBridge?: EngineMcpStdioServerOptions["unityBridge"];
   } = {}
 ): Promise<{

@@ -21,18 +21,21 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import {
   isCapabilityName,
+  getCapabilityDescriptor,
   validateCapabilityInput,
   validateCapabilityOutput,
   type CapabilityName
 } from "@engine-mcp/contracts";
 
 import { isJsonRecord } from "./json.js";
+import { appendInlineToolJournalEntry } from "./journal-service.js";
 import { createPolicyDeniedToolError, evaluateToolPolicy } from "./policy-engine.js";
 import {
   completePromptArgument,
   getRenderedPrompt,
   listRegisteredPrompts
 } from "./prompts.js";
+import { resolveInlineSnapshotLink } from "./snapshot-service.js";
 import {
   createInvocationContext,
   createInvocationRootsState,
@@ -52,6 +55,7 @@ import {
   type EngineMcpAdapterStateResource,
   type EngineMcpCapabilityAdapter,
   type EngineMcpCapabilityInvocationContext,
+  type EngineMcpJournalService,
   type EngineMcpInvocationRootsState,
   type EngineMcpProtocolServerRuntime,
   type EngineMcpRootsChangeState,
@@ -67,6 +71,7 @@ import {
 export function createProtocolServer(options: {
   getAdapter: () => EngineMcpCapabilityAdapter;
   getAdapterStateResource: () => EngineMcpAdapterStateResource;
+  journalService: EngineMcpJournalService;
   serverInfo: Implementation;
   instructions: string;
   experimentalTasks?: ResolvedExperimentalTasksOptions;
@@ -181,6 +186,7 @@ export function createProtocolServer(options: {
     handleToolCall(
       server,
       options.getAdapter(),
+      options.journalService,
       request.params,
       extra,
       options.experimentalTasks,
@@ -211,6 +217,7 @@ export function createProtocolServer(options: {
 async function handleToolCall(
   server: Server,
   adapter: EngineMcpCapabilityAdapter,
+  journalService: EngineMcpJournalService,
   params: CallToolRequest["params"],
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   experimentalTasks?: ResolvedExperimentalTasksOptions,
@@ -242,7 +249,15 @@ async function handleToolCall(
     return handleTaskAugmentedToolCall(server, adapter, params, extra, experimentalTasks, rootsState);
   }
 
-  return executeInlineToolCall(server, adapter, params.name, params.arguments ?? {}, extra, rootsState);
+  return executeInlineToolCall(
+    server,
+    adapter,
+    journalService,
+    params.name,
+    params.arguments ?? {},
+    extra,
+    rootsState
+  );
 }
 
 async function handleTaskAugmentedToolCall(
@@ -360,6 +375,7 @@ async function handleTaskAugmentedToolCall(
 async function executeInlineToolCall(
   server: Server,
   adapter: EngineMcpCapabilityAdapter,
+  journalService: EngineMcpJournalService,
   toolName: string,
   input: unknown,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
@@ -382,29 +398,38 @@ async function executeInlineToolCall(
     });
   }
 
+  const descriptor = getCapabilityDescriptor(toolName);
+  const policyEvaluation = evaluateToolPolicy(toolName, input);
+
   if (!adapter.capabilities.includes(toolName)) {
-    return createToolErrorResult(toolName, {
+    return createInlineJournaledToolResult(journalService, extra, toolName, {
       code: "capability_unsupported",
       message: `${adapter.adapter} does not implement ${toolName}.`
-    });
+    }, policyEvaluation, descriptor.operationClass, "failed");
   }
 
   const inputValidation = validateCapabilityInput(toolName, input);
 
   if (!inputValidation.valid) {
-    return createToolErrorResult(toolName, {
+    return createInlineJournaledToolResult(journalService, extra, toolName, {
       code: "validation_error",
       message: `Invalid ${toolName} input.`,
       details: {
         issues: inputValidation.errors
       }
-    });
+    }, policyEvaluation, descriptor.operationClass, "failed");
   }
 
-  const policyEvaluation = evaluateToolPolicy(toolName, input);
-
   if (policyEvaluation.decision.decision === "deny") {
-    return createToolErrorResult(toolName, createPolicyDeniedToolError(policyEvaluation));
+    return createInlineJournaledToolResult(
+      journalService,
+      extra,
+      toolName,
+      createPolicyDeniedToolError(policyEvaluation),
+      policyEvaluation,
+      descriptor.operationClass,
+      "denied"
+    );
   }
 
   let output: unknown;
@@ -423,32 +448,68 @@ async function executeInlineToolCall(
       throw error;
     }
 
-    return createToolErrorResult(toolName, normalizeToolError(error));
+    return createInlineJournaledToolResult(
+      journalService,
+      extra,
+      toolName,
+      normalizeToolError(error),
+      policyEvaluation,
+      descriptor.operationClass,
+      "failed"
+    );
   }
 
   const outputValidation = validateCapabilityOutput(toolName, output);
 
   if (!outputValidation.valid) {
-    return createToolErrorResult(toolName, {
+    return createInlineJournaledToolResult(journalService, extra, toolName, {
       code: "adapter_output_invalid",
       message: `Adapter returned an invalid ${toolName} payload.`,
       details: {
         issues: outputValidation.errors
       }
-    });
+    }, policyEvaluation, descriptor.operationClass, "failed");
   }
 
   if (!isJsonRecord(output)) {
-    return createToolErrorResult(toolName, {
+    return createInlineJournaledToolResult(journalService, extra, toolName, {
       code: "adapter_output_invalid",
       message: `Adapter returned a non-object ${toolName} payload.`,
       details: {
         receivedType: typeof output
       }
-    });
+    }, policyEvaluation, descriptor.operationClass, "failed");
   }
 
-  return createToolSuccessResult(toolName, adapter.adapter, output);
+  const snapshotResolution = resolveInlineSnapshotLink({
+    capability: toolName,
+    adapterId: adapter.adapter,
+    decision: policyEvaluation.decision,
+    output
+  });
+
+  if ("error" in snapshotResolution) {
+    return createInlineJournaledToolResult(
+      journalService,
+      extra,
+      toolName,
+      snapshotResolution.error,
+      policyEvaluation,
+      descriptor.operationClass,
+      "failed"
+    );
+  }
+
+  return createInlineJournaledSuccessResult(
+    journalService,
+    extra,
+    toolName,
+    adapter.adapter,
+    output,
+    snapshotResolution.snapshot,
+    policyEvaluation,
+    descriptor.operationClass
+  );
 }
 
 async function executeTaskAugmentedToolCall(options: {
@@ -508,4 +569,81 @@ async function executeTaskAugmentedToolCall(options: {
 
   await options.taskStore.storeTaskResult(options.taskId, status, result).catch(() => undefined);
   options.cancellationRegistry.delete(options.taskId);
+}
+
+async function createInlineJournaledSuccessResult(
+  journalService: EngineMcpJournalService,
+  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+  capability: CapabilityName,
+  adapterId: string,
+  output: Record<string, unknown>,
+  snapshot: Parameters<typeof appendInlineToolJournalEntry>[0]["snapshot"],
+  policyEvaluation: ReturnType<typeof evaluateToolPolicy>,
+  riskClass: ReturnType<typeof getCapabilityDescriptor>["operationClass"]
+): Promise<{
+  _meta: Record<string, unknown>;
+  content: Array<{
+    type: "text";
+    text: string;
+  }>;
+  structuredContent: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  try {
+    await appendInlineToolJournalEntry({
+      journalService,
+      capability,
+      riskClass,
+      extra,
+      decision: policyEvaluation.decision,
+      target: policyEvaluation.target,
+      snapshot,
+      status: "succeeded"
+    });
+  } catch {
+    return createToolErrorResult(capability, {
+      code: "journal_write_failed",
+      message: `Failed to append journal entry for ${capability}.`
+    });
+  }
+
+  return createToolSuccessResult(capability, adapterId, output);
+}
+
+async function createInlineJournaledToolResult(
+  journalService: EngineMcpJournalService,
+  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+  capability: CapabilityName,
+  error: ReturnType<typeof normalizeToolError>,
+  policyEvaluation: ReturnType<typeof evaluateToolPolicy>,
+  riskClass: ReturnType<typeof getCapabilityDescriptor>["operationClass"],
+  status: "failed" | "denied"
+): Promise<{
+  _meta: Record<string, unknown>;
+  content: Array<{
+    type: "text";
+    text: string;
+  }>;
+  structuredContent: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  try {
+    await appendInlineToolJournalEntry({
+      journalService,
+      capability,
+      riskClass,
+      extra,
+      decision: policyEvaluation.decision,
+      target: policyEvaluation.target,
+      status,
+      error
+    });
+  } catch {
+    return createToolErrorResult(capability, {
+      code: "journal_write_failed",
+      message: `Failed to append journal entry for ${capability}.`
+    });
+  }
+
+  return createToolErrorResult(capability, error);
 }

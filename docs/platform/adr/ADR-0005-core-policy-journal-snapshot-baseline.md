@@ -95,7 +95,7 @@ Tradeoffs:
   - `packages/core-server`
   - `packages/contracts`
   - `adapters/unity/bridge`
-  - sandbox assets/tests in `Unity-Tests/6000.3.1f1`
+  - sandbox assets/tests in `Unity-Tests/6000.3.11f1`
 
 ## Sources
 

@@ -46,6 +46,7 @@ export type {
   EngineMcpCoreServerRuntime,
   EngineMcpExperimentalTasksOptions,
   EngineMcpHttpAuthorizationOptions,
+  EngineMcpJournalService,
   EngineMcpInMemoryEventStoreOptions,
   EngineMcpInMemoryTaskMessageQueueOptions,
   EngineMcpModelImmediateResponseContext,
@@ -62,6 +63,7 @@ export type {
 } from "./shared.js";
 
 export { createInMemoryEventStore, createInMemoryTaskMessageQueue } from "./internal/tasks.js";
+export { createInMemoryJournalService } from "./internal/journal-service.js";
 export {
   createCoreServer,
   startCoreServerStdio,

@@ -10,6 +10,7 @@ import type { ConformanceCase, ConformanceReport } from "@engine-mcp/conformance
 import { summarizeConformanceReport } from "@engine-mcp/conformance-runner";
 import type {
   CapabilityName,
+  JournalEntry,
   PromptArgumentCompletionProvider,
   PromptDefinition
 } from "@engine-mcp/contracts";
@@ -285,12 +286,18 @@ export interface EngineMcpAdapterStateResource {
   updatedAt: string;
 }
 
+export interface EngineMcpJournalService {
+  append(entry: JournalEntry): Promise<void> | void;
+  list(): Promise<readonly JournalEntry[]> | readonly JournalEntry[];
+}
+
 export interface EngineMcpCoreServerOptions {
   adapter?: EngineMcpCapabilityAdapter;
   adapterRegistry?: EngineMcpAdapterRegistry;
   adapterName?: string;
   conformancePreflight?: EngineMcpConformancePreflightOptions;
   experimentalTasks?: EngineMcpExperimentalTasksOptions;
+  journalService?: EngineMcpJournalService;
   unityBridge?: UnityBridgePreferredAdapterOptions;
   serverInfo?: Implementation;
   instructions?: string;
