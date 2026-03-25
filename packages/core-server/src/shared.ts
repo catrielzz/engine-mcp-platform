@@ -11,8 +11,10 @@ import { summarizeConformanceReport } from "@engine-mcp/conformance-runner";
 import type {
   CapabilityName,
   JournalEntry,
+  PolicyTargetDescriptor,
   PromptArgumentCompletionProvider,
-  PromptDefinition
+  PromptDefinition,
+  SnapshotMetadata
 } from "@engine-mcp/contracts";
 import type {
   TaskMessageQueue,
@@ -291,6 +293,30 @@ export interface EngineMcpJournalService {
   list(): Promise<readonly JournalEntry[]> | readonly JournalEntry[];
 }
 
+export interface EngineMcpSnapshotMetadataRecord {
+  snapshot: SnapshotMetadata;
+  rollbackAvailable: boolean;
+  updatedAt: string;
+  target?: PolicyTargetDescriptor;
+}
+
+export interface EngineMcpSnapshotMetadataStore {
+  upsert(record: EngineMcpSnapshotMetadataRecord): Promise<void> | void;
+  get(
+    snapshotId: string
+  ):
+    | Promise<EngineMcpSnapshotMetadataRecord | undefined>
+    | EngineMcpSnapshotMetadataRecord
+    | undefined;
+  list():
+    | Promise<readonly EngineMcpSnapshotMetadataRecord[]>
+    | readonly EngineMcpSnapshotMetadataRecord[];
+}
+
+export interface EngineMcpPersistenceOptions {
+  rootDir?: string;
+}
+
 export interface EngineMcpCoreServerOptions {
   adapter?: EngineMcpCapabilityAdapter;
   adapterRegistry?: EngineMcpAdapterRegistry;
@@ -298,6 +324,8 @@ export interface EngineMcpCoreServerOptions {
   conformancePreflight?: EngineMcpConformancePreflightOptions;
   experimentalTasks?: EngineMcpExperimentalTasksOptions;
   journalService?: EngineMcpJournalService;
+  snapshotMetadataStore?: EngineMcpSnapshotMetadataStore;
+  persistence?: false | EngineMcpPersistenceOptions;
   unityBridge?: UnityBridgePreferredAdapterOptions;
   serverInfo?: Implementation;
   instructions?: string;

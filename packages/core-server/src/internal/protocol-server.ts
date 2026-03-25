@@ -36,7 +36,10 @@ import {
   listRegisteredPrompts
 } from "./prompts.js";
 import { resolveInlineJournalStatus } from "./rollback-service.js";
-import { resolveInlineSnapshotLink } from "./snapshot-service.js";
+import {
+  createInlineSnapshotMetadataRecord,
+  resolveInlineSnapshotLink
+} from "./snapshot-service.js";
 import {
   createInvocationContext,
   createInvocationRootsState,
@@ -60,6 +63,7 @@ import {
   type EngineMcpInvocationRootsState,
   type EngineMcpProtocolServerRuntime,
   type EngineMcpRootsChangeState,
+  type EngineMcpSnapshotMetadataStore,
   type EngineMcpTaskCancellationRegistry,
   type ResolvedExperimentalTasksOptions
 } from "../shared.js";
@@ -73,6 +77,7 @@ export function createProtocolServer(options: {
   getAdapter: () => EngineMcpCapabilityAdapter;
   getAdapterStateResource: () => EngineMcpAdapterStateResource;
   journalService: EngineMcpJournalService;
+  snapshotMetadataStore: EngineMcpSnapshotMetadataStore;
   serverInfo: Implementation;
   instructions: string;
   experimentalTasks?: ResolvedExperimentalTasksOptions;
@@ -188,6 +193,7 @@ export function createProtocolServer(options: {
       server,
       options.getAdapter(),
       options.journalService,
+      options.snapshotMetadataStore,
       request.params,
       extra,
       options.experimentalTasks,
@@ -219,6 +225,7 @@ async function handleToolCall(
   server: Server,
   adapter: EngineMcpCapabilityAdapter,
   journalService: EngineMcpJournalService,
+  snapshotMetadataStore: EngineMcpSnapshotMetadataStore,
   params: CallToolRequest["params"],
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   experimentalTasks?: ResolvedExperimentalTasksOptions,
@@ -254,6 +261,7 @@ async function handleToolCall(
     server,
     adapter,
     journalService,
+    snapshotMetadataStore,
     params.name,
     params.arguments ?? {},
     extra,
@@ -377,6 +385,7 @@ async function executeInlineToolCall(
   server: Server,
   adapter: EngineMcpCapabilityAdapter,
   journalService: EngineMcpJournalService,
+  snapshotMetadataStore: EngineMcpSnapshotMetadataStore,
   toolName: string,
   input: unknown,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
@@ -503,6 +512,7 @@ async function executeInlineToolCall(
 
   return createInlineJournaledSuccessResult(
     journalService,
+    snapshotMetadataStore,
     extra,
     toolName,
     adapter.adapter,
@@ -574,6 +584,7 @@ async function executeTaskAugmentedToolCall(options: {
 
 async function createInlineJournaledSuccessResult(
   journalService: EngineMcpJournalService,
+  snapshotMetadataStore: EngineMcpSnapshotMetadataStore,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   capability: CapabilityName,
   adapterId: string,
@@ -594,8 +605,18 @@ async function createInlineJournaledSuccessResult(
     capability,
     output
   });
+  const snapshotMetadata = createInlineSnapshotMetadataRecord({
+    capability,
+    adapterId,
+    snapshot,
+    target: policyEvaluation.target
+  });
 
   try {
+    if (snapshotMetadata) {
+      await snapshotMetadataStore.upsert(snapshotMetadata);
+    }
+
     await appendInlineToolJournalEntry({
       journalService,
       capability,

@@ -1,6 +1,15 @@
-import type { CapabilityName, JournalSnapshotLink, PolicyDecisionRecord } from "@engine-mcp/contracts";
+import type {
+  CapabilityName,
+  JournalSnapshotLink,
+  PolicyDecisionRecord,
+  PolicyTargetDescriptor
+} from "@engine-mcp/contracts";
 
-import type { EngineMcpToolError } from "../shared.js";
+import type {
+  EngineMcpSnapshotMetadataRecord,
+  EngineMcpToolError
+} from "../shared.js";
+import { createSnapshotMetadataRecord } from "./snapshot-metadata-store.js";
 
 export function resolveInlineSnapshotLink(options: {
   capability: CapabilityName;
@@ -40,6 +49,24 @@ export function resolveInlineSnapshotLink(options: {
       rollbackAvailable: options.capability !== "snapshot.restore"
     }
   };
+}
+
+export function createInlineSnapshotMetadataRecord(options: {
+  capability: CapabilityName;
+  adapterId: string;
+  snapshot: JournalSnapshotLink | undefined;
+  target?: PolicyTargetDescriptor;
+}): EngineMcpSnapshotMetadataRecord | undefined {
+  if (!options.snapshot) {
+    return undefined;
+  }
+
+  return createSnapshotMetadataRecord({
+    capability: options.capability,
+    adapterId: options.adapterId,
+    snapshot: options.snapshot,
+    ...(options.target ? { target: options.target } : {})
+  });
 }
 
 function readSnapshotId(output: Readonly<Record<string, unknown>>): string | undefined {

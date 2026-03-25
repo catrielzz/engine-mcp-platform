@@ -216,6 +216,8 @@ This slice is done when:
 - [Rollback Baseline Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/rollback-baseline/roadmap.md)
 - [Core Sandbox Validation README](E:/engine-mcp-platform/docs/platform/security/core-hardening/core-sandbox-validation/README.md)
 - [Core Sandbox Validation Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/core-sandbox-validation/roadmap.md)
+- [Persistence README](E:/engine-mcp-platform/docs/platform/security/core-hardening/persistence/README.md)
+- [Persistence Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/persistence/roadmap.md)
 
 ## Sources
 

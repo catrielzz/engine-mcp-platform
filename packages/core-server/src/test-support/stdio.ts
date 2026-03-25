@@ -11,6 +11,7 @@ import {
   type EngineMcpJournalService,
   type EngineMcpAdapterRegistry,
   type EngineMcpCapabilityAdapter,
+  type EngineMcpSnapshotMetadataStore,
   type EngineMcpStdioServerOptions
 } from "../index.js";
 
@@ -126,6 +127,8 @@ export async function createHarness(
     conformancePreflight?: EngineMcpStdioServerOptions["conformancePreflight"];
     experimentalTasks?: EngineMcpStdioServerOptions["experimentalTasks"];
     journalService?: EngineMcpJournalService;
+    snapshotMetadataStore?: EngineMcpSnapshotMetadataStore;
+    persistence?: EngineMcpStdioServerOptions["persistence"];
     unityBridge?: EngineMcpStdioServerOptions["unityBridge"];
   } = {}
 ): Promise<StdioHarness> {
@@ -140,7 +143,21 @@ export async function createHarness(
     adapterName: options.adapterName,
     conformancePreflight: options.conformancePreflight,
     experimentalTasks: options.experimentalTasks,
-    journalService: options.journalService ?? createInMemoryJournalService(),
+    ...(options.journalService !== undefined
+      ? {
+          journalService: options.journalService
+        }
+      : options.persistence === undefined
+        ? {
+            journalService: createInMemoryJournalService()
+          }
+        : {}),
+    ...(options.snapshotMetadataStore !== undefined
+      ? {
+          snapshotMetadataStore: options.snapshotMetadataStore
+        }
+      : {}),
+    persistence: options.persistence,
     unityBridge: options.unityBridge
   });
 

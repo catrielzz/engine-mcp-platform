@@ -51,8 +51,11 @@ export type {
   EngineMcpInMemoryTaskMessageQueueOptions,
   EngineMcpModelImmediateResponseContext,
   EngineMcpModelImmediateResponseResolver,
+  EngineMcpPersistenceOptions,
   EngineMcpProtectedResourceMetadata,
   EngineMcpSamplingPolicyOptions,
+  EngineMcpSnapshotMetadataRecord,
+  EngineMcpSnapshotMetadataStore,
   EngineMcpStaticBearerAuthorizationOptions,
   EngineMcpStdioServerOptions,
   EngineMcpStdioServerRuntime,
@@ -64,6 +67,11 @@ export type {
 
 export { createInMemoryEventStore, createInMemoryTaskMessageQueue } from "./internal/tasks.js";
 export { createInMemoryJournalService } from "./internal/journal-service.js";
+export { createFileJournalService } from "./internal/journal-store.js";
+export {
+  createFileSnapshotMetadataStore,
+  createInMemorySnapshotMetadataStore
+} from "./internal/snapshot-metadata-store.js";
 export {
   createCoreServer,
   startCoreServerStdio,

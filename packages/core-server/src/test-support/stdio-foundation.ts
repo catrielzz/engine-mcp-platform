@@ -4,6 +4,7 @@ import type {
   EngineMcpAdapterRegistry,
   EngineMcpCapabilityAdapter,
   EngineMcpJournalService,
+  EngineMcpSnapshotMetadataStore,
   EngineMcpStdioServerOptions
 } from "../index.js";
 
@@ -19,6 +20,8 @@ export async function createInitializedHarness(
     conformancePreflight?: EngineMcpStdioServerOptions["conformancePreflight"];
     experimentalTasks?: EngineMcpStdioServerOptions["experimentalTasks"];
     journalService?: EngineMcpJournalService;
+    snapshotMetadataStore?: EngineMcpSnapshotMetadataStore;
+    persistence?: EngineMcpStdioServerOptions["persistence"];
     unityBridge?: EngineMcpStdioServerOptions["unityBridge"];
   } = {}
 ): Promise<{
