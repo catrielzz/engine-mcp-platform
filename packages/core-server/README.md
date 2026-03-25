@@ -10,6 +10,7 @@ Current documentation for the prompt/resource surface of this package:
 - [MCP Prompts](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts)
 - [MCP Resources](https://modelcontextprotocol.io/specification/2025-06-18/server/resources)
 - [MCP Completion](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/completion)
+- [MCP Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
 
 Current bootstrap slice:
 
@@ -41,6 +42,7 @@ Current bootstrap slice:
 - exposes adapter-registry runtime state as the standard MCP resource `engine-mcp://runtime/adapter-state`, with `resources/read` for pull-based inspection and `notifications/resources/updated` for subscribers when adapter selection or preflight health changes
 - supports standard `notifications/message` for server logging and request-scoped `notifications/progress` when clients provide a `progressToken`
 - normalizes policy-driven adapter denials into the same public tool error shape used for bridge-side remote errors: `structuredContent.error = { code, message, details }`, with policy reasons such as `target_outside_sandbox` and `rollback_unavailable` surfaced as the public `message`
+- now also owns the first server-side policy preflight skeleton for inline `tools/call`, classifying capability risk from `@engine-mcp/contracts` and denying out-of-sandbox destructive scene mutations before adapter execution
 - uses a bounded in-memory SSE replay store by default, with explicit per-stream event-count eviction and optional max-age eviction
 - supports live `notifications/tasks/status` over standalone `GET` SSE and resumable `tasks/result` request streams via `Last-Event-ID`
 - treats `notifications/tasks/status` as optional on the client side; requestors should keep polling via `tasks/get` / `tasks/list` for required state changes

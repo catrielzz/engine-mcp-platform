@@ -39,3 +39,18 @@ This slice is limited to:
 - journal service
 - snapshot orchestration
 - rollback runtime behavior
+
+## Next Slice: Policy Preflight Skeleton
+
+### Scope
+
+- server-side risk classification from canonical capability descriptors
+- inline `tools/call` preflight before adapter execution
+- structured deny path for destructive scene mutations outside sandbox
+
+### Out Of Scope
+
+- journal persistence
+- snapshot orchestration
+- task-augmented deny handling
+- adapter-side policy replacement

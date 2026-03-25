@@ -27,6 +27,7 @@ import {
 } from "@engine-mcp/contracts";
 
 import { isJsonRecord } from "./json.js";
+import { createPolicyDeniedToolError, evaluateToolPolicy } from "./policy-engine.js";
 import {
   completePromptArgument,
   getRenderedPrompt,
@@ -398,6 +399,12 @@ async function executeInlineToolCall(
         issues: inputValidation.errors
       }
     });
+  }
+
+  const policyEvaluation = evaluateToolPolicy(toolName, input);
+
+  if (policyEvaluation.decision.decision === "deny") {
+    return createToolErrorResult(toolName, createPolicyDeniedToolError(policyEvaluation));
   }
 
   let output: unknown;
