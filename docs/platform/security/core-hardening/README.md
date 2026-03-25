@@ -210,6 +210,8 @@ This slice is done when:
 
 - [Journal Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/README.md)
 - [Journal Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/roadmap.md)
+- [Snapshot Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/README.md)
+- [Snapshot Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/roadmap.md)
 
 ## Sources
 

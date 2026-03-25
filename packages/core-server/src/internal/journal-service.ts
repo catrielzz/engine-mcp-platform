@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type {
   JournalEntry,
+  JournalSnapshotLink,
   JournalResultStatus,
   PolicyDecisionRecord,
   PolicyTargetDescriptor
@@ -33,6 +34,7 @@ export async function appendInlineToolJournalEntry(options: {
   extra: EngineMcpCoreRequestExtra;
   decision: PolicyDecisionRecord;
   target?: PolicyTargetDescriptor;
+  snapshot?: JournalSnapshotLink;
   status: JournalResultStatus;
   error?: EngineMcpToolError;
 }): Promise<void> {
@@ -44,6 +46,7 @@ export async function appendInlineToolJournalEntry(options: {
     actor: createJournalActor(options.extra),
     ...(options.target ? { target: options.target } : {}),
     decision: options.decision,
+    ...(options.snapshot ? { snapshot: options.snapshot } : {}),
     result: {
       status: options.status,
       ...(options.error ? { error: toJournalRecordedError(options.error) } : {})

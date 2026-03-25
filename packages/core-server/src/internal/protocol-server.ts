@@ -35,6 +35,7 @@ import {
   getRenderedPrompt,
   listRegisteredPrompts
 } from "./prompts.js";
+import { resolveInlineSnapshotLink } from "./snapshot-service.js";
 import {
   createInvocationContext,
   createInvocationRootsState,
@@ -480,12 +481,32 @@ async function executeInlineToolCall(
     }, policyEvaluation, descriptor.operationClass, "failed");
   }
 
+  const snapshotResolution = resolveInlineSnapshotLink({
+    capability: toolName,
+    adapterId: adapter.adapter,
+    decision: policyEvaluation.decision,
+    output
+  });
+
+  if ("error" in snapshotResolution) {
+    return createInlineJournaledToolResult(
+      journalService,
+      extra,
+      toolName,
+      snapshotResolution.error,
+      policyEvaluation,
+      descriptor.operationClass,
+      "failed"
+    );
+  }
+
   return createInlineJournaledSuccessResult(
     journalService,
     extra,
     toolName,
     adapter.adapter,
     output,
+    snapshotResolution.snapshot,
     policyEvaluation,
     descriptor.operationClass
   );
@@ -556,6 +577,7 @@ async function createInlineJournaledSuccessResult(
   capability: CapabilityName,
   adapterId: string,
   output: Record<string, unknown>,
+  snapshot: Parameters<typeof appendInlineToolJournalEntry>[0]["snapshot"],
   policyEvaluation: ReturnType<typeof evaluateToolPolicy>,
   riskClass: ReturnType<typeof getCapabilityDescriptor>["operationClass"]
 ): Promise<{
@@ -575,6 +597,7 @@ async function createInlineJournaledSuccessResult(
       extra,
       decision: policyEvaluation.decision,
       target: policyEvaluation.target,
+      snapshot,
       status: "succeeded"
     });
   } catch {
