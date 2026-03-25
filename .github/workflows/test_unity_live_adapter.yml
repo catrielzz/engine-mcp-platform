@@ -1,0 +1,52 @@
+name: test-unity-live-adapter
+
+on:
+  workflow_dispatch:
+    inputs:
+      bootstrapPath:
+        description: Optional absolute path to the live Unity plugin bootstrap file. Leave empty to use the bridge default path.
+        required: false
+        type: string
+
+jobs:
+  validate-live-adapter:
+    name: Validate live Unity adapter on self-hosted windows
+    runs-on: [self-hosted, windows, x64, unity, unity-tests]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Show live validation mode
+        shell: pwsh
+        run: |
+          if ("${{ inputs.bootstrapPath }}" -ne "") {
+            Write-Host "Using explicit bootstrap path: ${{ inputs.bootstrapPath }}"
+          } else {
+            Write-Host "Using the default Unity plugin bootstrap path resolved by the bridge runtime."
+          }
+          Write-Host "This workflow expects a live Unity Editor session with the plugin bridge already available."
+
+      - name: Run live preferred-adapter validation suites
+        env:
+          ENGINE_MCP_ENABLE_UNITY_LIVE_VALIDATION: "true"
+          ENGINE_MCP_UNITY_LIVE_BOOTSTRAP_PATH: ${{ inputs.bootstrapPath }}
+        run: >
+          pnpm --filter @engine-mcp/core-server exec vitest --config ../../vitest.package.ts run
+          ./src/stdio.unity-live-validation.test.ts
+          ./src/http.unity-live-validation.test.ts
