@@ -68,6 +68,7 @@ import {
   type ResolvedExperimentalTasksOptions
 } from "../shared.js";
 import {
+  createResourceNotFoundError,
   isKnownResourceUri,
   listRegisteredResources,
   readRegisteredResource
@@ -162,13 +163,15 @@ export function createProtocolServer(options: {
     readRegisteredResource({
       uri: request.params.uri,
       adapter: options.getAdapter(),
-      getAdapterStateResource: options.getAdapterStateResource
+      getAdapterStateResource: options.getAdapterStateResource,
+      journalService: options.journalService,
+      snapshotMetadataStore: options.snapshotMetadataStore
     })
   );
 
   server.setRequestHandler(SubscribeRequestSchema, async (request) => {
     if (!(await isKnownResourceUri(options.getAdapter(), request.params.uri))) {
-      throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${request.params.uri}`);
+      throw createResourceNotFoundError(request.params.uri);
     }
 
     resourceSubscriptions.add(request.params.uri);
@@ -177,7 +180,7 @@ export function createProtocolServer(options: {
 
   server.setRequestHandler(UnsubscribeRequestSchema, async (request) => {
     if (!(await isKnownResourceUri(options.getAdapter(), request.params.uri))) {
-      throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${request.params.uri}`);
+      throw createResourceNotFoundError(request.params.uri);
     }
 
     resourceSubscriptions.delete(request.params.uri);

@@ -39,7 +39,13 @@ Current bootstrap slice:
 - caches `roots/list` results within a single tool invocation and invalidates that cache when the client emits `notifications/roots/list_changed`
 - emits standard `notifications/tools/list_changed` when the active adapter changes at runtime
 - emits standard `notifications/prompts/list_changed` when the active adapter changes the visible prompt registry at runtime
-- exposes adapter-registry runtime state as the standard MCP resource `engine-mcp://runtime/adapter-state`, with `resources/read` for pull-based inspection and `notifications/resources/updated` for subscribers when adapter selection or preflight health changes
+- exposes core-owned runtime resources for:
+  - adapter-registry state via `engine-mcp://runtime/adapter-state`
+  - journal inspection via `engine-mcp://runtime/journal-index`
+  - snapshot metadata inspection via `engine-mcp://runtime/snapshot-metadata-index`
+- serves those runtime resources through standard MCP `resources/read`
+- returns MCP resource-not-found semantics for unknown resource URIs instead of collapsing them into generic invalid-params handling
+- keeps `notifications/resources/updated` on the current adapter-state subscription path when adapter selection or preflight health changes
 - supports standard `notifications/message` for server logging and request-scoped `notifications/progress` when clients provide a `progressToken`
 - normalizes policy-driven adapter denials into the same public tool error shape used for bridge-side remote errors: `structuredContent.error = { code, message, details }`, with policy reasons such as `target_outside_sandbox` and `rollback_unavailable` surfaced as the public `message`
 - now also owns the first server-side policy preflight skeleton for inline `tools/call`, classifying capability risk from `@engine-mcp/contracts` and denying out-of-sandbox destructive scene mutations before adapter execution

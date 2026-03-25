@@ -566,6 +566,9 @@ export const DEFAULT_IN_MEMORY_TASK_MESSAGE_RETENTION_MS = 300_000;
 export const DEFAULT_IN_MEMORY_TASK_MESSAGE_PRUNE_INTERVAL_MS = 60_000;
 export const CORE_SERVER_ADAPTER_STATE_RESOURCE_URI = "engine-mcp://runtime/adapter-state";
 export const CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE = "application/json";
+export const CORE_SERVER_JOURNAL_INDEX_RESOURCE_URI = "engine-mcp://runtime/journal-index";
+export const CORE_SERVER_SNAPSHOT_METADATA_INDEX_RESOURCE_URI =
+  "engine-mcp://runtime/snapshot-metadata-index";
 export const CORE_SERVER_PROTECTED_RESOURCE_METADATA_ROOT_PATH =
   "/.well-known/oauth-protected-resource";
 

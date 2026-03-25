@@ -1,28 +1,30 @@
-import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 import type {
   EngineMcpAdapterResourceDefinition,
   EngineMcpAdapterStateResource,
-  EngineMcpCapabilityAdapter
+  EngineMcpCapabilityAdapter,
+  EngineMcpJournalService,
+  EngineMcpSnapshotMetadataStore
 } from "../shared.js";
-import {
-  CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE,
-  CORE_SERVER_ADAPTER_STATE_RESOURCE_URI
-} from "../shared.js";
+import { listCoreRuntimeResources, readCoreRuntimeResource } from "./runtime-resources.js";
+
+export const MCP_RESOURCE_NOT_FOUND_ERROR_CODE = -32002;
+
+export function createResourceNotFoundError(uri: string): McpError {
+  return new McpError(MCP_RESOURCE_NOT_FOUND_ERROR_CODE, "Resource not found", {
+    uri
+  });
+}
 
 export async function listRegisteredResources(
   adapter: EngineMcpCapabilityAdapter
 ): Promise<readonly EngineMcpAdapterResourceDefinition[]> {
   const resourcesByUri = new Map<string, EngineMcpAdapterResourceDefinition>();
 
-  resourcesByUri.set(CORE_SERVER_ADAPTER_STATE_RESOURCE_URI, {
-    uri: CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
-    name: "adapter-state",
-    title: "Adapter State",
-    description:
-      "Current adapter selection, health, and conformance snapshot for the Engine MCP core server.",
-    mimeType: CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE
-  });
+  for (const resource of listCoreRuntimeResources()) {
+    resourcesByUri.set(resource.uri, resource);
+  }
 
   for (const resource of (await adapter.listResources?.()) ?? []) {
     resourcesByUri.set(resource.uri, resource);
@@ -35,6 +37,8 @@ export async function readRegisteredResource(options: {
   uri: string;
   adapter: EngineMcpCapabilityAdapter;
   getAdapterStateResource: () => EngineMcpAdapterStateResource;
+  journalService: EngineMcpJournalService;
+  snapshotMetadataStore: EngineMcpSnapshotMetadataStore;
 }): Promise<{
   contents: Array<{
     uri: string;
@@ -42,13 +46,20 @@ export async function readRegisteredResource(options: {
     text: string;
   }>;
 }> {
-  if (options.uri === CORE_SERVER_ADAPTER_STATE_RESOURCE_URI) {
+  const runtimeContent = await readCoreRuntimeResource({
+    uri: options.uri,
+    getAdapterStateResource: options.getAdapterStateResource,
+    journalService: options.journalService,
+    snapshotMetadataStore: options.snapshotMetadataStore
+  });
+
+  if (runtimeContent) {
     return {
       contents: [
         {
-          uri: CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
-          mimeType: CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE,
-          text: JSON.stringify(options.getAdapterStateResource(), null, 2)
+          uri: runtimeContent.uri,
+          ...(runtimeContent.mimeType ? { mimeType: runtimeContent.mimeType } : {}),
+          text: runtimeContent.text
         }
       ]
     };
@@ -57,7 +68,7 @@ export async function readRegisteredResource(options: {
   const content = await options.adapter.readResource?.(options.uri);
 
   if (!content) {
-    throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${options.uri}`);
+    throw createResourceNotFoundError(options.uri);
   }
 
   return {

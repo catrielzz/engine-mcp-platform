@@ -218,6 +218,8 @@ This slice is done when:
 - [Core Sandbox Validation Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/core-sandbox-validation/roadmap.md)
 - [Persistence README](E:/engine-mcp-platform/docs/platform/security/core-hardening/persistence/README.md)
 - [Persistence Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/persistence/roadmap.md)
+- [Journal Resources README](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-resources/README.md)
+- [Journal Resources Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-resources/roadmap.md)
 
 ## Sources
 
