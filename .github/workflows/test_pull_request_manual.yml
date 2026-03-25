@@ -23,7 +23,7 @@ jobs:
   test-unity-6000-3-11f1-editmode:
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
-      projectPath: "./Unity-Tests/6000.3.1f1"
+      projectPath: "./Unity-Tests/6000.3.11f1"
       unityVersion: "6000.3.11f1"
       testMode: "editmode"
     secrets: inherit
@@ -33,7 +33,7 @@ jobs:
   # test-unity-6000-3-11f1-playmode:
   #   uses: ./.github/workflows/test_unity_plugin.yml
   #   with:
-  #     projectPath: "./Unity-Tests/6000.3.1f1"
+  #     projectPath: "./Unity-Tests/6000.3.11f1"
   #     unityVersion: "6000.3.11f1"
   #     testMode: "playmode"
   #   secrets: inherit
@@ -43,7 +43,7 @@ jobs:
   test-unity-6000-3-11f1-standalone:
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
-      projectPath: "./Unity-Tests/6000.3.1f1"
+      projectPath: "./Unity-Tests/6000.3.11f1"
       unityVersion: "6000.3.11f1"
       testMode: "standalone"
     secrets: inherit

@@ -109,7 +109,7 @@ Expected implementation surfaces:
 - [packages/core-server](E:/engine-mcp-platform/packages/core-server)
 - [packages/contracts](E:/engine-mcp-platform/packages/contracts)
 - [adapters/unity/bridge](E:/engine-mcp-platform/adapters/unity/bridge)
-- [Unity-Tests/6000.3.1f1](E:/engine-mcp-platform/Unity-Tests/6000.3.1f1)
+- [Unity-Tests/6000.3.11f1](E:/engine-mcp-platform/Unity-Tests/6000.3.11f1)
 
 ### Proposed core module split
 

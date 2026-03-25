@@ -81,5 +81,5 @@
             "source.fixAll": "explicit"
         }
     },
-    "dotnet.defaultSolution": "6000.3.1f1.slnx"
+    "dotnet.defaultSolution": "6000.3.11f1.slnx"
 }

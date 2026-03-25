@@ -8,7 +8,7 @@ import { verbose } from '../utils/ui.js';
 
 export const installUnityCommand = new Command('install-unity')
   .description('Install Unity Editor via Unity Hub')
-  .argument('[version]', 'Unity Editor version to install (e.g. 6000.3.1f1). Omit to install latest stable release.')
+  .argument('[version]', 'Unity Editor version to install (e.g. 6000.3.11f1). Omit to install latest stable release.')
   .option('--path <path>', 'Read version from an existing Unity project')
   .action(async (positionalVersion: string | undefined, options: { path?: string }) => {
     verbose(`install-unity invoked with version=${positionalVersion ?? '(auto)'}, path=${options.path ?? '(none)'}`);

@@ -236,12 +236,12 @@ npx unity-mcp-cli install-plugin ./MyGame --plugin-version 0.52.0
 Unity Hub CLI を通じて Unity Editor のバージョンをインストールします。
 
 ```bash
-npx unity-mcp-cli install-unity 6000.3.1f1
+npx unity-mcp-cli install-unity 6000.3.11f1
 ```
 
 | 引数 / オプション | 必須 | 説明 |
 |---|---|---|
-| `[version]` | いいえ | インストールする Unity Editor のバージョン（例: `6000.3.1f1`） |
+| `[version]` | いいえ | インストールする Unity Editor のバージョン（例: `6000.3.11f1`） |
 | `--path <path>` | いいえ | 既存のプロジェクトから必要なバージョンを読み取る |
 
 引数もオプションも指定しない場合、コマンドは Unity Hub のリリース一覧から最新の安定版をインストールします。
@@ -298,7 +298,7 @@ npx unity-mcp-cli remove-plugin ./MyGame
 
 ```bash
 # 1. 新しい Unity プロジェクトを作成する
-npx unity-mcp-cli create-project ./MyAIGame --unity 6000.3.1f1
+npx unity-mcp-cli create-project ./MyAIGame --unity 6000.3.11f1
 
 # 2. Unity-MCP プラグインをインストールする
 npx unity-mcp-cli install-plugin ./MyAIGame

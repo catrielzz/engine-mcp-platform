@@ -38,8 +38,8 @@ describe("splitCommandLine", () => {
 });
 
 describe("readProjectEditorVersion", () => {
-  it("reads the real project version from Unity-Tests/6000.3.1f1", () => {
-    const projectPath = path.resolve("E:/engine-mcp-platform/Unity-Tests/6000.3.1f1");
+  it("reads the real project version from Unity-Tests/6000.3.11f1", () => {
+    const projectPath = path.resolve("E:/engine-mcp-platform/Unity-Tests/6000.3.11f1");
     expect(readProjectEditorVersion(projectPath)).toBe("6000.3.11f1");
   });
 });
@@ -47,8 +47,8 @@ describe("readProjectEditorVersion", () => {
 describe("resolveWindowsUnityEditorPath", () => {
   it("prefers the project's exact version when installed", () => {
     const result = resolveWindowsUnityEditorPath({
-      projectPath: path.resolve("E:/engine-mcp-platform/Unity-Tests/6000.3.1f1"),
-      unityVersion: "6000.3.1f1",
+      projectPath: path.resolve("E:/engine-mcp-platform/Unity-Tests/6000.3.11f1"),
+      unityVersion: "6000.3.11f1",
       installRoot: "C:\\Program Files\\Unity\\Hub\\Editor",
       installedVersionsByRoot: {
         "C:\\Program Files\\Unity\\Hub\\Editor": ["2022.3.62f3", "6000.3.11f1"]
