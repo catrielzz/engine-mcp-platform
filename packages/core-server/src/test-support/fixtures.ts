@@ -1,4 +1,8 @@
-import { validateCapabilityInput, type CapabilityName } from "@engine-mcp/contracts";
+import {
+  validateCapabilityInput,
+  type CapabilityName,
+  type PromptDefinition
+} from "@engine-mcp/contracts";
 
 import type { EngineMcpCapabilityAdapter } from "../index.js";
 import type { TaskDescriptor } from "./types.js";
@@ -27,6 +31,43 @@ export const VALID_SAMPLES = {
       diagnostics: []
     }
   },
+  "scene.hierarchy.read": {
+    input: {},
+    output: {
+      container: {
+        displayName: "SandboxScene",
+        enginePath: "Assets/MCP_Sandbox/Scenes/SandboxScene.unity"
+      },
+      roots: [
+        {
+          object: {
+            logicalName: "SandboxRoot",
+            displayName: "SandboxRoot"
+          },
+          active: true,
+          children: [
+            {
+              object: {
+                logicalName: "SandboxRoot/Gameplay",
+                displayName: "Gameplay"
+              },
+              active: true,
+              children: [
+                {
+                  object: {
+                    logicalName: "SandboxRoot/Gameplay/CheckpointMarker",
+                    displayName: "CheckpointMarker"
+                  },
+                  active: true,
+                  children: []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
   "scene.object.delete": {
     input: {
       target: {
@@ -40,6 +81,29 @@ export const VALID_SAMPLES = {
       },
       deleted: true,
       snapshotId: "snapshot-001"
+    }
+  },
+  "asset.search": {
+    input: {
+      query: "Spawner",
+      kinds: ["script"],
+      limit: 50
+    },
+    output: {
+      results: [
+        {
+          assetPath: "Assets/Scripts/Spawner.cs",
+          displayName: "Spawner",
+          kind: "script"
+        },
+        {
+          assetPath: "Assets/Scripts/SpawnerAuthoring.cs",
+          displayName: "SpawnerAuthoring",
+          kind: "script"
+        }
+      ],
+      total: 2,
+      truncated: false
     }
   },
   "snapshot.restore": {
@@ -59,11 +123,23 @@ export const VALID_SAMPLES = {
 
 export function createFakeAdapter(
   capabilities: readonly EngineMcpCapabilityAdapter["capabilities"][number][],
-  handler: (request: any) => Promise<unknown> | unknown
+  handler: (request: any) => Promise<unknown> | unknown,
+  options: {
+    prompts?: readonly PromptDefinition[];
+    listResources?: EngineMcpCapabilityAdapter["listResources"];
+    readResource?: EngineMcpCapabilityAdapter["readResource"];
+    completePromptArgument?: EngineMcpCapabilityAdapter["completePromptArgument"];
+  } = {}
 ): EngineMcpCapabilityAdapter {
   return {
     adapter: "fake-core-server-adapter",
     capabilities,
+    ...(options.prompts ? { prompts: options.prompts } : {}),
+    ...(options.listResources ? { listResources: options.listResources } : {}),
+    ...(options.readResource ? { readResource: options.readResource } : {}),
+    ...(options.completePromptArgument
+      ? { completePromptArgument: options.completePromptArgument }
+      : {}),
     invoke: handler as EngineMcpCapabilityAdapter["invoke"]
   };
 }

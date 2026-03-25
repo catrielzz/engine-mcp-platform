@@ -8,7 +8,11 @@ import {
 } from "@engine-mcp/unity-bridge";
 import type { ConformanceCase, ConformanceReport } from "@engine-mcp/conformance-runner";
 import { summarizeConformanceReport } from "@engine-mcp/conformance-runner";
-import type { CapabilityName } from "@engine-mcp/contracts";
+import type {
+  CapabilityName,
+  PromptArgumentCompletionProvider,
+  PromptDefinition
+} from "@engine-mcp/contracts";
 import type {
   TaskMessageQueue,
   TaskStore
@@ -77,9 +81,44 @@ export interface EngineMcpCapabilityInvocationContext {
   createElicitationCompletionNotifier(elicitationId: string): () => Promise<void>;
 }
 
+export interface EngineMcpPromptArgumentCompletionRequest {
+  promptName: string;
+  argumentName: string;
+  provider: PromptArgumentCompletionProvider;
+  value: string;
+}
+
+export interface EngineMcpAdapterResourceDefinition {
+  uri: string;
+  name: string;
+  title?: string;
+  description?: string;
+  mimeType?: string;
+}
+
+export interface EngineMcpAdapterResourceContent {
+  uri: string;
+  mimeType?: string;
+  text: string;
+}
+
 export interface EngineMcpCapabilityAdapter {
   readonly adapter: string;
   readonly capabilities: readonly CapabilityName[];
+  readonly prompts?: readonly PromptDefinition[];
+  listResources?():
+    | Promise<readonly EngineMcpAdapterResourceDefinition[] | EngineMcpAdapterResourceDefinition[]>
+    | readonly EngineMcpAdapterResourceDefinition[]
+    | EngineMcpAdapterResourceDefinition[];
+  readResource?(
+    uri: string
+  ):
+    | Promise<EngineMcpAdapterResourceContent | undefined>
+    | EngineMcpAdapterResourceContent
+    | undefined;
+  completePromptArgument?(
+    request: EngineMcpPromptArgumentCompletionRequest
+  ): Promise<readonly string[] | string[]> | readonly string[] | string[];
   invoke(request: EngineMcpCapabilityInvocation): Promise<unknown> | unknown;
 }
 
@@ -296,6 +335,7 @@ export interface EngineMcpCoreServerRuntime {
     sessionId?: string
   ): Promise<void>;
   notifyToolListChanged(): Promise<void>;
+  notifyPromptListChanged(): Promise<void>;
   replaceAdapter(
     adapter: EngineMcpCapabilityAdapter,
     options?: EngineMcpAdapterSwitchOptions
@@ -328,6 +368,7 @@ export interface EngineMcpStreamableHttpServerRuntime {
     sessionId?: string
   ): Promise<void>;
   notifyToolListChanged(): Promise<void>;
+  notifyPromptListChanged(): Promise<void>;
   replaceAdapter(
     adapter: EngineMcpCapabilityAdapter,
     options?: EngineMcpAdapterSwitchOptions
@@ -388,6 +429,7 @@ export interface EngineMcpRuntimeAdapterController {
   getAdapterStateResource(): EngineMcpAdapterStateResource;
   readonly availableAdapterNames: readonly string[];
   notifyToolListChanged(): Promise<void>;
+  notifyPromptListChanged(): Promise<void>;
   replaceAdapter(
     adapter: EngineMcpCapabilityAdapter,
     options?: EngineMcpAdapterSwitchOptions
@@ -421,6 +463,7 @@ export interface EngineMcpTaskCancellationRegistry {
 export interface EngineMcpProtocolServerRuntime {
   readonly server: Server;
   sendToolListChanged(): Promise<void>;
+  sendPromptListChanged(): Promise<void>;
   sendAdapterStateUpdated(): Promise<void>;
 }
 

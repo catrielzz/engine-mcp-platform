@@ -68,6 +68,9 @@ export async function createCoreServer(
     onToolListChanged: async () => {
       await protocolRuntime.sendToolListChanged();
     },
+    onPromptListChanged: async () => {
+      await protocolRuntime.sendPromptListChanged();
+    },
     onAdapterStateChanged: async () => {
       await protocolRuntime.sendToolListChanged();
       await protocolRuntime.sendAdapterStateUpdated();
@@ -102,6 +105,9 @@ export async function createCoreServer(
     },
     notifyToolListChanged(): Promise<void> {
       return controller.notifyToolListChanged();
+    },
+    notifyPromptListChanged(): Promise<void> {
+      return controller.notifyPromptListChanged();
     },
     replaceAdapter(
       adapter: EngineMcpCapabilityAdapter,
@@ -184,6 +190,13 @@ export async function startCoreServerStreamableHttp(
       await Promise.all(
         [...sessions.values()].map((trackedSession) =>
           trackedSession.session.runtime.sendToolListChanged().catch(() => undefined)
+        )
+      );
+    },
+    onPromptListChanged: async () => {
+      await Promise.all(
+        [...sessions.values()].map((trackedSession) =>
+          trackedSession.session.runtime.sendPromptListChanged().catch(() => undefined)
         )
       );
     },
@@ -537,6 +550,9 @@ export async function startCoreServerStreamableHttp(
     },
     notifyToolListChanged(): Promise<void> {
       return controller.notifyToolListChanged();
+    },
+    notifyPromptListChanged(): Promise<void> {
+      return controller.notifyPromptListChanged();
     },
     replaceAdapter(
       adapter: EngineMcpCapabilityAdapter,

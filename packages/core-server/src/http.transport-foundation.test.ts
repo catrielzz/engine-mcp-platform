@@ -1,4 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { UNITY_BRIDGE_PROMPT_PACK } from "@engine-mcp/unity-bridge";
+import {
+  ENGINE_DISCOVERY_RESOURCE_MIME_TYPE,
+  ENGINE_TEST_CATALOG_RESOURCE_URI
+} from "@engine-mcp/contracts";
 
 import {
   CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
@@ -127,6 +132,99 @@ describe("@engine-mcp/core-server Streamable HTTP transport foundation", () => {
       }
     });
     expect(adapterState.availableAdapters).toEqual(expect.arrayContaining(["unity", "registry-read"]));
+  });
+
+  it("lists and reads adapter discovery resources over Streamable HTTP", async () => {
+    const runtime = await startCoreServerStreamableHttp({
+      port: 0,
+      adapter: createFakeAdapter(
+        ["test.job.read"],
+        async () => ({
+          jobId: "job-001",
+          status: "completed"
+        }),
+        {
+          listResources: () => [
+            {
+              uri: ENGINE_TEST_CATALOG_RESOURCE_URI,
+              name: "test-catalog",
+              title: "Test Catalog",
+              description: "Observed test identifiers available to the active engine adapter.",
+              mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+            }
+          ],
+          readResource: (uri) =>
+            uri === ENGINE_TEST_CATALOG_RESOURCE_URI
+              ? {
+                  uri,
+                  mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE,
+                  text: JSON.stringify({
+                    adapterId: "fake-core-server-adapter",
+                    tests: ["Sandbox.EditMode.GeneratedTest"]
+                  })
+                }
+              : undefined
+        }
+      )
+    });
+    openServers.push(runtime);
+
+    const { session } = await initializeHttpClientSession(runtime, {
+      requestId: "init-http-discovery-resources",
+      capabilities: {}
+    });
+
+    const listResourcesResponse = await callHttpJsonRpc(session, {
+      requestId: "resource-list-http-discovery",
+      method: "resources/list"
+    });
+    const listResourcesBody = (await listResourcesResponse.json()) as {
+      result: {
+        resources: Array<{
+          uri: string;
+          name: string;
+          mimeType?: string;
+        }>;
+      };
+    };
+
+    expect(listResourcesResponse.status).toBe(200);
+    expect(listResourcesBody.result.resources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          uri: ENGINE_TEST_CATALOG_RESOURCE_URI,
+          name: "test-catalog",
+          mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+        })
+      ])
+    );
+
+    const readResourceResponse = await callHttpJsonRpc(session, {
+      requestId: "resource-read-http-discovery",
+      method: "resources/read",
+      params: {
+        uri: ENGINE_TEST_CATALOG_RESOURCE_URI
+      }
+    });
+    const readResourceBody = (await readResourceResponse.json()) as {
+      result: {
+        contents: Array<{
+          uri: string;
+          mimeType?: string;
+          text: string;
+        }>;
+      };
+    };
+
+    expect(readResourceResponse.status).toBe(200);
+    expect(readResourceBody.result.contents[0]).toMatchObject({
+      uri: ENGINE_TEST_CATALOG_RESOURCE_URI,
+      mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+    });
+    expect(JSON.parse(readResourceBody.result.contents[0].text)).toEqual({
+      adapterId: "fake-core-server-adapter",
+      tests: ["Sandbox.EditMode.GeneratedTest"]
+    });
   });
 
   it("evicts oldest replay events per stream when the configured max is reached", async () => {
@@ -392,6 +490,12 @@ describe("@engine-mcp/core-server Streamable HTTP transport foundation", () => {
       result: {
         serverInfo: {
           name: "@engine-mcp/core-server"
+        },
+        capabilities: {
+          completions: {},
+          prompts: {
+            listChanged: true
+          }
         }
       }
     });
@@ -411,6 +515,298 @@ describe("@engine-mcp/core-server Streamable HTTP transport foundation", () => {
           }
         ]
       }
+    });
+  });
+
+  it("lists and renders platform prompts over Streamable HTTP", async () => {
+    const runtime = await startCoreServerStreamableHttp({
+      port: 0,
+      adapter: createFakeAdapter(
+        ["editor.state.read", "scene.object.create", "snapshot.restore"],
+        async () => VALID_SAMPLES["editor.state.read"].output
+      )
+    });
+    openServers.push(runtime);
+
+    const { session, initializeBody } = await initializeHttpClientSession(runtime, {
+      requestId: "init-http-prompts",
+      capabilities: {}
+    });
+
+    expect(JSON.parse(initializeBody)).toMatchObject({
+      result: {
+        capabilities: {
+          completions: {},
+          prompts: {
+            listChanged: true
+          }
+        }
+      }
+    });
+
+    const listPromptsResponse = await callHttpJsonRpc(session, {
+      requestId: "prompts-list-http",
+      method: "prompts/list"
+    });
+    const listPromptsBody = (await listPromptsResponse.json()) as {
+      result: {
+        prompts: Array<{
+          name: string;
+        }>;
+      };
+    };
+
+    expect(listPromptsResponse.status).toBe(200);
+    expect(listPromptsBody.result.prompts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "scene.object.create.workflow"
+        }),
+        expect.objectContaining({
+          name: "snapshot.restore.workflow"
+        })
+      ])
+    );
+
+    const getPromptResponse = await callHttpJsonRpc(session, {
+      requestId: "prompt-get-http",
+      method: "prompts/get",
+      params: {
+        name: "test.failure.triage",
+        arguments: {
+          failing_test: "Sandbox_CreatesObject",
+          failure_output: "Expected object to exist after create",
+          suspect_assets: "Assets/Scripts/Spawner.cs",
+          desired_outcome: "Find the most likely root cause"
+        }
+      }
+    });
+    const getPromptBody = (await getPromptResponse.json()) as {
+      result: {
+        description?: string;
+        messages: Array<{
+          role: string;
+          content: {
+            type: string;
+            text: string;
+          };
+        }>;
+      };
+    };
+
+    expect(getPromptResponse.status).toBe(200);
+    expect(getPromptBody.result.description).toBe(
+      "Investigate a failing editor-side test run using canonical Engine MCP read-only tools before proposing a fix."
+    );
+    expect(getPromptBody.result.messages[1]?.content.text).toContain(
+      "Triaging failing test: Sandbox_CreatesObject"
+    );
+    expect(getPromptBody.result.messages[1]?.content.text).toContain(
+      "Suspect assets: Assets/Scripts/Spawner.cs"
+    );
+  });
+
+  it("lists and renders Unity adapter prompt packs over Streamable HTTP", async () => {
+    const runtime = await startCoreServerStreamableHttp({
+      port: 0,
+      adapter: createFakeAdapter(
+        [
+          "editor.state.read",
+          "console.read",
+          "script.validate"
+        ],
+        async () => VALID_SAMPLES["editor.state.read"].output,
+        {
+          prompts: UNITY_BRIDGE_PROMPT_PACK
+        }
+      )
+    });
+    openServers.push(runtime);
+
+    const { session } = await initializeHttpClientSession(runtime, {
+      requestId: "init-http-unity-prompts",
+      capabilities: {}
+    });
+
+    const listPromptsResponse = await callHttpJsonRpc(session, {
+      requestId: "prompts-list-http-unity",
+      method: "prompts/list"
+    });
+    const listPromptsBody = (await listPromptsResponse.json()) as {
+      result: {
+        prompts: Array<{
+          name: string;
+        }>;
+      };
+    };
+    const promptNames = listPromptsBody.result.prompts.map(({ name }) => name);
+
+    expect(listPromptsResponse.status).toBe(200);
+    expect(promptNames).toEqual(
+      expect.arrayContaining([
+        "test.failure.triage",
+        "unity.script.validate.fix-plan"
+      ])
+    );
+    expect(promptNames).not.toContain("unity.scene.object.create.gameobject");
+
+    const getPromptResponse = await callHttpJsonRpc(session, {
+      requestId: "prompt-get-http-unity",
+      method: "prompts/get",
+      params: {
+        name: "unity.script.validate.fix-plan",
+        arguments: {
+          objective: "Find the smallest safe fix plan",
+          script_path: "Assets/Scripts/Spawner.cs",
+          failure_signal: "CS0103: The name spawnRoot does not exist in the current context",
+          suspect_dependencies: "Assets/Prefabs/Spawner.prefab",
+          desired_outcome: "Root cause and next code change"
+        }
+      }
+    });
+    const getPromptBody = (await getPromptResponse.json()) as {
+      result: {
+        description?: string;
+        messages: Array<{
+          role: string;
+          content: {
+            type: string;
+            text: string;
+          };
+        }>;
+      };
+    };
+
+    expect(getPromptResponse.status).toBe(200);
+    expect(getPromptBody.result.description).toBe(
+      "Investigate a Unity script or compile failure with validation and console evidence before proposing the smallest safe fix."
+    );
+    expect(getPromptBody.result.messages[1]?.content.text).toContain(
+      "Primary script: Assets/Scripts/Spawner.cs"
+    );
+  });
+
+  it("completes Unity prompt arguments over Streamable HTTP", async () => {
+    const runtime = await startCoreServerStreamableHttp({
+      port: 0,
+      adapter: createFakeAdapter(
+        [
+          "editor.state.read",
+          "console.read",
+          "script.validate",
+          "asset.search"
+        ],
+        async (request) => {
+          if (request.capability === "asset.search") {
+            return VALID_SAMPLES["asset.search"].output;
+          }
+
+          return VALID_SAMPLES["editor.state.read"].output;
+        },
+        {
+          prompts: UNITY_BRIDGE_PROMPT_PACK
+        }
+      )
+    });
+    openServers.push(runtime);
+
+    const { session } = await initializeHttpClientSession(runtime, {
+      requestId: "init-http-unity-completions",
+      capabilities: {}
+    });
+
+    const completionResponse = await callHttpJsonRpc(session, {
+      requestId: "prompt-complete-http-unity",
+      method: "completion/complete",
+      params: {
+        ref: {
+          type: "ref/prompt",
+          name: "unity.script.validate.fix-plan"
+        },
+        argument: {
+          name: "script_path",
+          value: "Spawner"
+        }
+      }
+    });
+    const completionBody = (await completionResponse.json()) as {
+      result: {
+        completion: {
+          values: string[];
+          total: number;
+          hasMore?: boolean;
+        };
+      };
+    };
+
+    expect(completionResponse.status).toBe(200);
+    expect(completionBody.result.completion).toMatchObject({
+      values: [
+        "Assets/Scripts/Spawner.cs",
+        "Assets/Scripts/SpawnerAuthoring.cs"
+      ],
+      total: 2
+    });
+  });
+
+  it("completes adapter-backed test identifiers over Streamable HTTP", async () => {
+    const runtime = await startCoreServerStreamableHttp({
+      port: 0,
+      adapter: createFakeAdapter(
+        ["test.run", "test.job.read"],
+        async () => ({
+          jobId: "job-001",
+          status: "completed"
+        }),
+        {
+          completePromptArgument: async ({ provider }) =>
+            provider === "engine.test_name"
+              ? [
+                  "Sandbox.EditMode.GeneratedTest",
+                  "Gameplay.EditMode.CheckpointTests.CreatesMarker",
+                  "Gameplay.PlayMode.CheckpointTests.RestoresSnapshot"
+                ]
+              : []
+        }
+      )
+    });
+    openServers.push(runtime);
+
+    const { session } = await initializeHttpClientSession(runtime, {
+      requestId: "init-http-test-name-completions",
+      capabilities: {}
+    });
+
+    const completionResponse = await callHttpJsonRpc(session, {
+      requestId: "prompt-complete-http-test-name",
+      method: "completion/complete",
+      params: {
+        ref: {
+          type: "ref/prompt",
+          name: "test.failure.triage"
+        },
+        argument: {
+          name: "failing_test",
+          value: "checkpoint"
+        }
+      }
+    });
+    const completionBody = (await completionResponse.json()) as {
+      result: {
+        completion: {
+          values: string[];
+          total: number;
+        };
+      };
+    };
+
+    expect(completionResponse.status).toBe(200);
+    expect(completionBody.result.completion).toEqual({
+      values: [
+        "Gameplay.EditMode.CheckpointTests.CreatesMarker",
+        "Gameplay.PlayMode.CheckpointTests.RestoresSnapshot"
+      ],
+      total: 2
     });
   });
 

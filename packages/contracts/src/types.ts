@@ -13,12 +13,14 @@ export type CapabilityName =
   | "test.job.read"
   | "snapshot.restore";
 
-export type OperationClass =
+export type OperationRiskClass =
   | "read"
   | "write_safe"
   | "write_project"
   | "destructive"
   | "external";
+
+export type OperationClass = OperationRiskClass;
 
 export type ContractStatus = "bootstrap" | "active" | "deprecated";
 
@@ -29,6 +31,49 @@ export interface CapabilityDescriptor {
   summary: string;
   inputSchema: string;
   outputSchema: string;
+}
+
+export interface PromptArgumentDescriptor {
+  name: string;
+  description?: string;
+  required?: boolean;
+  completion?: PromptArgumentCompletion;
+}
+
+export type PromptArgumentCompletionProvider =
+  | "static.values"
+  | "scene.logical_name"
+  | "asset.script_path"
+  | "engine.snapshot_id"
+  | "engine.test_name";
+
+export interface PromptArgumentCompletion {
+  provider: PromptArgumentCompletionProvider;
+  values?: readonly string[];
+}
+
+export interface PromptTextContentTemplate {
+  type: "text";
+  text: string;
+}
+
+export interface PromptMessageTemplate {
+  role: "user" | "assistant";
+  content: PromptTextContentTemplate;
+}
+
+export interface PromptDefinition {
+  name: string;
+  title?: string;
+  description?: string;
+  requiredCapabilities?: readonly CapabilityName[];
+  arguments?: readonly PromptArgumentDescriptor[];
+  messages: readonly PromptMessageTemplate[];
+}
+
+export interface PromptRenderResult {
+  description?: string;
+  messages: readonly PromptMessageTemplate[];
 }
 
 export interface CapabilityCatalog {
@@ -67,6 +112,15 @@ export interface CapabilityCatalogRecord {
   slice: string;
   version: string;
   capabilities: CapabilityDescriptorRecord[];
+}
+
+export interface PromptDefinitionRecord {
+  name: string;
+  title?: string;
+  description?: string;
+  requiredCapabilities?: CapabilityName[];
+  arguments?: PromptArgumentDescriptor[];
+  messages: PromptMessageTemplate[];
 }
 
 export interface JsonSchemaDocument {
