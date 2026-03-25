@@ -1,6 +1,11 @@
 import { PassThrough } from "node:stream";
 
 import { afterEach, describe, expect, it } from "vitest";
+import { UNITY_BRIDGE_PROMPT_PACK } from "@engine-mcp/unity-bridge";
+import {
+  ENGINE_DISCOVERY_RESOURCE_MIME_TYPE,
+  ENGINE_SNAPSHOT_INDEX_RESOURCE_URI
+} from "@engine-mcp/contracts";
 
 import {
   CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
@@ -55,6 +60,10 @@ describe("@engine-mcp/core-server stdio foundation", () => {
           name: "@engine-mcp/core-server"
         },
         capabilities: {
+          completions: {},
+          prompts: {
+            listChanged: true
+          },
           tools: {
             listChanged: true
           }
@@ -194,6 +203,404 @@ describe("@engine-mcp/core-server stdio foundation", () => {
       }
     });
     expect(adapterState.availableAdapters).toEqual(expect.arrayContaining(["unity", "registry-read"]));
+  });
+
+  it("lists and reads adapter discovery resources over stdio", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        ["snapshot.restore"],
+        async () => VALID_SAMPLES["snapshot.restore"].output,
+        {
+          listResources: () => [
+            {
+              uri: ENGINE_SNAPSHOT_INDEX_RESOURCE_URI,
+              name: "snapshot-index",
+              title: "Snapshot Index",
+              description: "Recent snapshot identifiers available to the active engine adapter.",
+              mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+            }
+          ],
+          readResource: (uri) =>
+            uri === ENGINE_SNAPSHOT_INDEX_RESOURCE_URI
+              ? {
+                  uri,
+                  mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE,
+                  text: JSON.stringify({
+                    adapterId: "fake-core-server-adapter",
+                    snapshots: ["snapshot-0001", "snapshot-0002"]
+                  })
+                }
+              : undefined
+        }
+      )
+    });
+
+    const listResourcesResponse = await requestResult<{
+      resources: Array<{
+        uri: string;
+        name: string;
+        mimeType?: string;
+      }>;
+    }>(harness, "resources/list");
+
+    expect(listResourcesResponse.result.resources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          uri: ENGINE_SNAPSHOT_INDEX_RESOURCE_URI,
+          name: "snapshot-index",
+          mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+        })
+      ])
+    );
+
+    const readResourceResponse = await requestResult<{
+      contents: Array<{
+        uri: string;
+        mimeType?: string;
+        text: string;
+      }>;
+    }>(harness, "resources/read", {
+      uri: ENGINE_SNAPSHOT_INDEX_RESOURCE_URI
+    });
+
+    expect(readResourceResponse.result.contents[0]).toMatchObject({
+      uri: ENGINE_SNAPSHOT_INDEX_RESOURCE_URI,
+      mimeType: ENGINE_DISCOVERY_RESOURCE_MIME_TYPE
+    });
+    expect(JSON.parse(readResourceResponse.result.contents[0].text)).toEqual({
+      adapterId: "fake-core-server-adapter",
+      snapshots: ["snapshot-0001", "snapshot-0002"]
+    });
+  });
+
+  it("lists and renders platform prompts over stdio", async () => {
+    const { harness, initializeResponse } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        ["editor.state.read", "scene.object.create"],
+        async () => VALID_SAMPLES["editor.state.read"].output
+      )
+    });
+
+    expect(initializeResponse).toMatchObject({
+      result: {
+        capabilities: {
+          completions: {},
+          prompts: {
+            listChanged: true
+          }
+        }
+      }
+    });
+
+    const listPromptsResponse = await requestResult<{
+      prompts: Array<{
+        name: string;
+        title?: string;
+        arguments?: Array<{
+          name: string;
+          required?: boolean;
+        }>;
+      }>;
+    }>(harness, "prompts/list");
+
+    expect(listPromptsResponse.result.prompts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "scene.object.create.workflow",
+          arguments: expect.arrayContaining([
+            expect.objectContaining({
+              name: "objective",
+              required: true
+            }),
+            expect.objectContaining({
+              name: "object_name",
+              required: true
+            })
+          ])
+        }),
+        expect.objectContaining({
+          name: "test.failure.triage"
+        })
+      ])
+    );
+
+    const getPromptResponse = await requestResult<{
+      description?: string;
+      messages: Array<{
+        role: string;
+        content: {
+          type: string;
+          text: string;
+        };
+      }>;
+    }>(harness, "prompts/get", {
+      name: "scene.object.create.workflow",
+      arguments: {
+        objective: "Create a checkpoint marker",
+        object_name: "CheckpointMarker",
+        parent_path: "SandboxRoot/Gameplay",
+        transform: "position=(0,0,0)",
+        components: "BoxCollider",
+        constraints: "Stay inside sandbox",
+        verification: "Re-read hierarchy after creation"
+      }
+    });
+
+    expect(getPromptResponse.result).toMatchObject({
+      description:
+        "Plan and execute creation of a scene object inside the managed sandbox using canonical Engine MCP tools.",
+      messages: [
+        {
+          role: "assistant",
+          content: {
+            type: "text"
+          }
+        },
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: expect.stringContaining("Object name: CheckpointMarker")
+          }
+        }
+      ]
+    });
+    expect(getPromptResponse.result.messages[1]?.content.text).toContain(
+      "Parent path: SandboxRoot/Gameplay"
+    );
+  });
+
+  it("lists and renders Unity adapter prompt packs over stdio", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        [
+          "editor.state.read",
+          "scene.hierarchy.read",
+          "scene.object.create",
+          "scene.object.update"
+        ],
+        async () => VALID_SAMPLES["editor.state.read"].output,
+        {
+          prompts: UNITY_BRIDGE_PROMPT_PACK
+        }
+      )
+    });
+
+    const listPromptsResponse = await requestResult<{
+      prompts: Array<{
+        name: string;
+      }>;
+    }>(harness, "prompts/list");
+    const promptNames = listPromptsResponse.result.prompts.map(({ name }) => name);
+
+    expect(promptNames).toEqual(
+      expect.arrayContaining([
+        "scene.object.create.workflow",
+        "unity.scene.object.create.gameobject",
+        "unity.scene.object.configure.components"
+      ])
+    );
+    expect(promptNames).not.toContain("unity.script.validate.fix-plan");
+
+    const getPromptResponse = await requestResult<{
+      description?: string;
+      messages: Array<{
+        role: string;
+        content: {
+          type: string;
+          text: string;
+        };
+      }>;
+    }>(harness, "prompts/get", {
+      name: "unity.scene.object.create.gameobject",
+      arguments: {
+        objective: "Create a checkpoint trigger",
+        object_name: "CheckpointTrigger",
+        parent_path: "SandboxRoot/Gameplay",
+        object_kind: "trigger",
+        transform: "position=(0,1,0)",
+        components: "BoxCollider(isTrigger=true)",
+        labels: "checkpoint, gameplay",
+        verification: "Re-read the branch after creation"
+      }
+    });
+
+    expect(getPromptResponse.result.description).toBe(
+      "Create a Unity GameObject with the smallest safe mutation plan, then verify its final hierarchy path and component state."
+    );
+    expect(getPromptResponse.result.messages[1]?.content.text).toContain(
+      "Requested object name: CheckpointTrigger"
+    );
+    expect(getPromptResponse.result.messages[1]?.content.text).toContain(
+      "Object kind: trigger"
+    );
+  });
+
+  it("rejects prompts/get when required arguments are missing over stdio", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        ["editor.state.read", "scene.object.update"],
+        async () => VALID_SAMPLES["editor.state.read"].output
+      )
+    });
+
+    const errorResponse = await harness.request("prompts/get", {
+      name: "scene.object.update.workflow",
+      arguments: {
+        objective: "Disable a broken trigger"
+      }
+    });
+
+    expect(errorResponse).toMatchObject({
+      error: {
+        code: expect.any(Number),
+        message: expect.stringContaining(
+          "Invalid arguments for prompt scene.object.update.workflow"
+        )
+      }
+    });
+  });
+
+  it("completes prompt arguments from scene hierarchy over stdio", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        ["scene.object.create", "scene.hierarchy.read"],
+        async (request) => {
+          if (request.capability === "scene.hierarchy.read") {
+            return VALID_SAMPLES["scene.hierarchy.read"].output;
+          }
+
+          return {
+            object: {
+              logicalName: "SandboxRoot/Generated"
+            },
+            created: true
+          };
+        }
+      )
+    });
+
+    const completionResponse = await requestResult<{
+      completion: {
+        values: string[];
+        total: number;
+        hasMore?: boolean;
+      };
+    }>(harness, "completion/complete", {
+      ref: {
+        type: "ref/prompt",
+        name: "scene.object.create.workflow"
+      },
+      argument: {
+        name: "parent_path",
+        value: "game"
+      }
+    });
+
+    expect(completionResponse.result.completion).toMatchObject({
+      total: 2
+    });
+    expect(completionResponse.result.completion.values[0]).toBe("SandboxRoot/Gameplay");
+    expect(completionResponse.result.completion.values).toContain(
+      "SandboxRoot/Gameplay/CheckpointMarker"
+    );
+  });
+
+  it("completes adapter-backed snapshot ids over stdio", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapter: createFakeAdapter(
+        ["snapshot.restore"],
+        async () => VALID_SAMPLES["snapshot.restore"].output,
+        {
+          completePromptArgument: async ({ provider }) =>
+            provider === "engine.snapshot_id"
+              ? ["snapshot-0009", "snapshot-0010", "snapshot-0011"]
+              : []
+        }
+      )
+    });
+
+    const completionResponse = await requestResult<{
+      completion: {
+        values: string[];
+        total: number;
+      };
+    }>(harness, "completion/complete", {
+      ref: {
+        type: "ref/prompt",
+        name: "snapshot.restore.workflow"
+      },
+      argument: {
+        name: "snapshot_id",
+        value: "10"
+      }
+    });
+
+    expect(completionResponse.result.completion).toEqual({
+      values: ["snapshot-0010"],
+      total: 1
+    });
+  });
+
+  it("emits prompts/list_changed and filters prompts when the active adapter changes at runtime", async () => {
+    const { harness } = await createInitializedHarness(openHarnesses, {
+      adapterRegistry: createCoreServerAdapterRegistry({
+        defaultAdapterName: "registry-create",
+        entries: [
+          {
+            name: "registry-create",
+            create: () =>
+              createFakeAdapter(
+                ["scene.object.create"],
+                async () => VALID_SAMPLES["editor.state.read"].output
+              )
+          },
+          {
+            name: "registry-restore",
+            create: () =>
+              createContractAwareFakeAdapter(
+                {
+                  "snapshot.restore": VALID_SAMPLES["snapshot.restore"].output
+                },
+                "registry-restore-adapter"
+              )
+          }
+        ]
+      })
+    });
+
+    const initialPromptsResponse = await requestResult<{
+      prompts: Array<{
+        name: string;
+      }>;
+    }>(harness, "prompts/list");
+
+    expect(initialPromptsResponse.result.prompts.map(({ name }) => name)).toEqual(
+      expect.arrayContaining(["scene.object.create.workflow", "test.failure.triage"])
+    );
+    expect(initialPromptsResponse.result.prompts.map(({ name }) => name)).not.toContain(
+      "snapshot.restore.workflow"
+    );
+
+    const notificationPromise = harness.collector.waitFor(
+      "prompts/list_changed notification",
+      (message) => "method" in message && message.method === "notifications/prompts/list_changed"
+    );
+
+    await harness.selectAdapter("registry-restore");
+    await notificationPromise;
+
+    const nextPromptsResponse = await requestResult<{
+      prompts: Array<{
+        name: string;
+      }>;
+    }>(harness, "prompts/list");
+    const nextPromptNames = nextPromptsResponse.result.prompts.map(({ name }) => name);
+
+    expect(nextPromptNames).toEqual(
+      expect.arrayContaining(["snapshot.restore.workflow", "test.failure.triage"])
+    );
+    expect(nextPromptNames).not.toContain("scene.object.create.workflow");
   });
 
   it("delegates tools/call to the injected adapter and returns structured content", async () => {

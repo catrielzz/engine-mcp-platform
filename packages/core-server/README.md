@@ -4,6 +4,13 @@ Bootstrap MCP server runtime for the platform.
 
 As of March 19, 2026, the official production recommendation remains the `v1.x` SDK line, which uses `@modelcontextprotocol/sdk`. The future `v2` line and its split packages are tracked as a later migration, not as the bootstrap default.
 
+Current documentation for the prompt/resource surface of this package:
+
+- [Core Server Roadmap](E:/engine-mcp-platform/packages/core-server/roadmap.md)
+- [MCP Prompts](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts)
+- [MCP Resources](https://modelcontextprotocol.io/specification/2025-06-18/server/resources)
+- [MCP Completion](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/completion)
+
 Current bootstrap slice:
 
 - resolves adapters from a core-server registry, with Unity preferred-adapter registration built in
@@ -11,6 +18,8 @@ Current bootstrap slice:
 - boots the platform server over `stdio`
 - boots the platform server over `Streamable HTTP`
 - exposes adapter-declared canonical tools through the low-level `Server` API
+- exposes platform-owned parameterized MCP prompts through `prompts/list` and `prompts/get`, filtered by the active adapter's canonical capability surface and augmented by optional adapter-contributed prompt packs
+- supports MCP `completion/complete` for prompt arguments, including hierarchy-backed and script-path-backed completions when the active adapter can satisfy the underlying read capabilities
 - serves canonical `inputSchema` / `outputSchema` documents from `@engine-mcp/contracts`, without reading contract files directly in the server runtime
 - defaults to the preferred Unity adapter, which uses the live plugin when available and falls back to the sandbox bootstrap when not
 - can run an optional conformance preflight before transport startup and fail fast when the selected adapter does not meet the required capability slice
@@ -28,6 +37,7 @@ Current bootstrap slice:
 - supports URL-mode `elicitation/create`, `notifications/elicitation/complete`, inline `URLElicitationRequiredError` passthrough for `tools/call`, and late completion notifications that let the client retry after an out-of-band URL flow
 - caches `roots/list` results within a single tool invocation and invalidates that cache when the client emits `notifications/roots/list_changed`
 - emits standard `notifications/tools/list_changed` when the active adapter changes at runtime
+- emits standard `notifications/prompts/list_changed` when the active adapter changes the visible prompt registry at runtime
 - exposes adapter-registry runtime state as the standard MCP resource `engine-mcp://runtime/adapter-state`, with `resources/read` for pull-based inspection and `notifications/resources/updated` for subscribers when adapter selection or preflight health changes
 - supports standard `notifications/message` for server logging and request-scoped `notifications/progress` when clients provide a `progressToken`
 - normalizes policy-driven adapter denials into the same public tool error shape used for bridge-side remote errors: `structuredContent.error = { code, message, details }`, with policy reasons such as `target_outside_sandbox` and `rollback_unavailable` surfaced as the public `message`
@@ -57,6 +67,7 @@ Runtime behavior worth calling out:
   - `selectAdapter(name)`
   - `replaceAdapter(adapter)`
   - `notifyToolListChanged()`
+  - `notifyPromptListChanged()`
   - `sendLoggingMessage(params, sessionId?)`
 - tool adapters now receive optional request context in `invoke()`:
   - `requestId`

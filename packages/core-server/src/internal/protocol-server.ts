@@ -2,7 +2,10 @@ import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/proto
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   CallToolRequestSchema,
+  CompleteRequestSchema,
   ErrorCode,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   McpError,
@@ -24,6 +27,11 @@ import {
 } from "@engine-mcp/contracts";
 
 import { isJsonRecord } from "./json.js";
+import {
+  completePromptArgument,
+  getRenderedPrompt,
+  listRegisteredPrompts
+} from "./prompts.js";
 import {
   createInvocationContext,
   createInvocationRootsState,
@@ -49,6 +57,11 @@ import {
   type EngineMcpTaskCancellationRegistry,
   type ResolvedExperimentalTasksOptions
 } from "../shared.js";
+import {
+  isKnownResourceUri,
+  listRegisteredResources,
+  readRegisteredResource
+} from "./adapter-resources.js";
 
 export function createProtocolServer(options: {
   getAdapter: () => EngineMcpCapabilityAdapter;
@@ -63,7 +76,11 @@ export function createProtocolServer(options: {
   };
   const server = new Server(options.serverInfo, {
     capabilities: {
+      completions: {},
       logging: {},
+      prompts: {
+        listChanged: true
+      },
       resources: {
         subscribe: true
       },
@@ -93,7 +110,10 @@ export function createProtocolServer(options: {
           maxTaskQueueSize: options.experimentalTasks.maxQueueSize
         }
       : {}),
-    debouncedNotificationMethods: ["notifications/tools/list_changed"]
+    debouncedNotificationMethods: [
+      "notifications/tools/list_changed",
+      "notifications/prompts/list_changed"
+    ]
   });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -106,37 +126,36 @@ export function createProtocolServer(options: {
     )
   }));
 
-  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-    resources: [
-      {
-        uri: CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
-        name: "adapter-state",
-        title: "Adapter State",
-        description:
-          "Current adapter selection, health, and conformance snapshot for the Engine MCP core server.",
-        mimeType: CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE
-      }
-    ]
+  server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+    prompts: listRegisteredPrompts(options.getAdapter())
   }));
 
-  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-    if (request.params.uri !== CORE_SERVER_ADAPTER_STATE_RESOURCE_URI) {
-      throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${request.params.uri}`);
-    }
+  server.setRequestHandler(GetPromptRequestSchema, async (request) =>
+    getRenderedPrompt(
+      request.params.name,
+      request.params.arguments,
+      options.getAdapter()
+    )
+  );
 
-    return {
-      contents: [
-        {
-          uri: CORE_SERVER_ADAPTER_STATE_RESOURCE_URI,
-          mimeType: CORE_SERVER_ADAPTER_STATE_RESOURCE_MIME_TYPE,
-          text: JSON.stringify(options.getAdapterStateResource(), null, 2)
-        }
-      ]
-    };
-  });
+  server.setRequestHandler(CompleteRequestSchema, async (request, extra) =>
+    completePromptArgument(server, extra, options.getAdapter(), request.params)
+  );
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: await listRegisteredResources(options.getAdapter())
+  }));
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) =>
+    readRegisteredResource({
+      uri: request.params.uri,
+      adapter: options.getAdapter(),
+      getAdapterStateResource: options.getAdapterStateResource
+    })
+  );
 
   server.setRequestHandler(SubscribeRequestSchema, async (request) => {
-    if (request.params.uri !== CORE_SERVER_ADAPTER_STATE_RESOURCE_URI) {
+    if (!(await isKnownResourceUri(options.getAdapter(), request.params.uri))) {
       throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${request.params.uri}`);
     }
 
@@ -145,7 +164,7 @@ export function createProtocolServer(options: {
   });
 
   server.setRequestHandler(UnsubscribeRequestSchema, async (request) => {
-    if (request.params.uri !== CORE_SERVER_ADAPTER_STATE_RESOURCE_URI) {
+    if (!(await isKnownResourceUri(options.getAdapter(), request.params.uri))) {
       throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${request.params.uri}`);
     }
 
@@ -172,6 +191,9 @@ export function createProtocolServer(options: {
     server,
     sendToolListChanged(): Promise<void> {
       return server.sendToolListChanged();
+    },
+    sendPromptListChanged(): Promise<void> {
+      return server.sendPromptListChanged();
     },
     sendAdapterStateUpdated(): Promise<void> {
       if (!resourceSubscriptions.has(CORE_SERVER_ADAPTER_STATE_RESOURCE_URI)) {

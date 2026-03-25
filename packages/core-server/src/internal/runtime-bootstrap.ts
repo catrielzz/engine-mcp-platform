@@ -15,6 +15,7 @@ import {
   hasTaskStoreCleanup
 } from "./tasks.js";
 import { uniqueCapabilities } from "./tool-results.js";
+import { getVisiblePromptNames } from "./prompts.js";
 import {
   DEFAULT_CORE_SERVER_INFO,
   DEFAULT_CORE_SERVER_INSTRUCTIONS,
@@ -43,6 +44,7 @@ export function createRuntimeAdapterController(options: {
   bootstrap: ResolvedCoreServerBootstrap;
   unityBridge?: EngineMcpCoreServerOptions["unityBridge"];
   onToolListChanged: (adapterState: EngineMcpAdapterState) => Promise<void>;
+  onPromptListChanged: (adapterState: EngineMcpAdapterState) => Promise<void>;
   onAdapterStateChanged: (adapterState: EngineMcpAdapterState) => Promise<void>;
 }): EngineMcpRuntimeAdapterController {
   const adapterState: EngineMcpAdapterState = {
@@ -69,10 +71,14 @@ export function createRuntimeAdapterController(options: {
     notifyToolListChanged(): Promise<void> {
       return options.onToolListChanged(adapterState);
     },
+    notifyPromptListChanged(): Promise<void> {
+      return options.onPromptListChanged(adapterState);
+    },
     async replaceAdapter(
       adapter: EngineMcpCapabilityAdapter,
       adapterSwitchOptions: EngineMcpAdapterSwitchOptions = {}
     ): Promise<void> {
+      const previousVisiblePromptNames = getVisiblePromptNames(adapterState.adapter);
       const preflight = await runCoreServerConformancePreflight(
         adapter,
         adapterSwitchOptions.conformancePreflight ?? options.bootstrap.preflightOptions
@@ -82,6 +88,12 @@ export function createRuntimeAdapterController(options: {
       adapterState.adapterName = adapterSwitchOptions.adapterName;
       adapterState.preflight = preflight;
       adapterState.updatedAt = new Date().toISOString();
+
+      const nextVisiblePromptNames = getVisiblePromptNames(adapterState.adapter);
+
+      if (!samePromptNameList(previousVisiblePromptNames, nextVisiblePromptNames)) {
+        await options.onPromptListChanged(adapterState);
+      }
 
       await options.onAdapterStateChanged(adapterState);
     },
@@ -105,6 +117,17 @@ export function createRuntimeAdapterController(options: {
       });
     }
   };
+}
+
+function samePromptNameList(
+  left: readonly string[],
+  right: readonly string[]
+): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((name, index) => name === right[index]);
 }
 
 export async function resolveCoreServerBootstrap(

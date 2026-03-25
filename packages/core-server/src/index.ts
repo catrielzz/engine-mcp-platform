@@ -31,6 +31,8 @@ export type {
   EngineMcpAccessTokenValidationContext,
   EngineMcpAccessTokenValidationResult,
   EngineMcpAdapterRegistry,
+  EngineMcpAdapterResourceContent,
+  EngineMcpAdapterResourceDefinition,
   EngineMcpAdapterRegistryEntry,
   EngineMcpAdapterRegistryOptions,
   EngineMcpAdapterStateResource,
