@@ -214,6 +214,8 @@ This slice is done when:
 - [Snapshot Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/roadmap.md)
 - [Rollback Baseline README](E:/engine-mcp-platform/docs/platform/security/core-hardening/rollback-baseline/README.md)
 - [Rollback Baseline Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/rollback-baseline/roadmap.md)
+- [Core Sandbox Validation README](E:/engine-mcp-platform/docs/platform/security/core-hardening/core-sandbox-validation/README.md)
+- [Core Sandbox Validation Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/core-sandbox-validation/roadmap.md)
 
 ## Sources
 
