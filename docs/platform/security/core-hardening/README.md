@@ -212,6 +212,8 @@ This slice is done when:
 - [Journal Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/roadmap.md)
 - [Snapshot Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/README.md)
 - [Snapshot Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/snapshot-service/roadmap.md)
+- [Rollback Baseline README](E:/engine-mcp-platform/docs/platform/security/core-hardening/rollback-baseline/README.md)
+- [Rollback Baseline Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/rollback-baseline/roadmap.md)
 
 ## Sources
 

@@ -35,6 +35,7 @@ import {
   getRenderedPrompt,
   listRegisteredPrompts
 } from "./prompts.js";
+import { resolveInlineJournalStatus } from "./rollback-service.js";
 import { resolveInlineSnapshotLink } from "./snapshot-service.js";
 import {
   createInvocationContext,
@@ -589,6 +590,11 @@ async function createInlineJournaledSuccessResult(
   structuredContent: Record<string, unknown>;
   isError?: boolean;
 }> {
+  const status = resolveInlineJournalStatus({
+    capability,
+    output
+  });
+
   try {
     await appendInlineToolJournalEntry({
       journalService,
@@ -598,7 +604,7 @@ async function createInlineJournaledSuccessResult(
       decision: policyEvaluation.decision,
       target: policyEvaluation.target,
       snapshot,
-      status: "succeeded"
+      status
     });
   } catch {
     return createToolErrorResult(capability, {
