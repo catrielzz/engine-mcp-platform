@@ -22,6 +22,7 @@ import {
 } from "./http-auth.js";
 import { createProtocolServer } from "./protocol-server.js";
 import { resolveCoreServerBootstrap, createRuntimeAdapterController } from "./runtime-bootstrap.js";
+import { createInMemoryJournalService } from "./journal-service.js";
 import { createInMemoryEventStore, hasEventStoreCleanup } from "./tasks.js";
 import {
   DEFAULT_IN_MEMORY_EVENT_STORE_MAX_EVENT_AGE_MS,
@@ -61,6 +62,7 @@ export async function createCoreServer(
   options: EngineMcpCoreServerOptions = {}
 ): Promise<EngineMcpCoreServerRuntime> {
   const bootstrap = await resolveCoreServerBootstrap(options, defaultCoreServerAdapterRegistry);
+  const journalService = options.journalService ?? createInMemoryJournalService();
   let protocolRuntime!: EngineMcpProtocolServerRuntime;
   const controller = createRuntimeAdapterController({
     bootstrap,
@@ -79,6 +81,7 @@ export async function createCoreServer(
   protocolRuntime = createProtocolServer({
     getAdapter: () => controller.getAdapter(),
     getAdapterStateResource: () => controller.getAdapterStateResource(),
+    journalService,
     serverInfo: bootstrap.serverInfo,
     instructions: bootstrap.instructions,
     experimentalTasks: bootstrap.experimentalTasks
@@ -146,6 +149,7 @@ export async function startCoreServerStreamableHttp(
   options: EngineMcpStreamableHttpServerOptions = {}
 ): Promise<EngineMcpStreamableHttpServerRuntime> {
   const bootstrap = await resolveCoreServerBootstrap(options, defaultCoreServerAdapterRegistry);
+  const journalService = options.journalService ?? createInMemoryJournalService();
   const now = () => Date.now();
   const host = options.host ?? DEFAULT_STREAMABLE_HTTP_HOST;
   const path = normalizeHttpPath(options.path ?? DEFAULT_STREAMABLE_HTTP_PATH);
@@ -336,6 +340,7 @@ export async function startCoreServerStreamableHttp(
           const runtime = createProtocolServer({
             getAdapter: () => controller.getAdapter(),
             getAdapterStateResource: () => controller.getAdapterStateResource(),
+            journalService,
             serverInfo: bootstrap.serverInfo,
             instructions: bootstrap.instructions,
             experimentalTasks: bootstrap.experimentalTasks

@@ -6,7 +6,9 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import {
+  createInMemoryJournalService,
   startCoreServerStdio,
+  type EngineMcpJournalService,
   type EngineMcpAdapterRegistry,
   type EngineMcpCapabilityAdapter,
   type EngineMcpStdioServerOptions
@@ -123,6 +125,7 @@ export async function createHarness(
     clientCapabilities?: Record<string, unknown>;
     conformancePreflight?: EngineMcpStdioServerOptions["conformancePreflight"];
     experimentalTasks?: EngineMcpStdioServerOptions["experimentalTasks"];
+    journalService?: EngineMcpJournalService;
     unityBridge?: EngineMcpStdioServerOptions["unityBridge"];
   } = {}
 ): Promise<StdioHarness> {
@@ -137,6 +140,7 @@ export async function createHarness(
     adapterName: options.adapterName,
     conformancePreflight: options.conformancePreflight,
     experimentalTasks: options.experimentalTasks,
+    journalService: options.journalService ?? createInMemoryJournalService(),
     unityBridge: options.unityBridge
   });
 

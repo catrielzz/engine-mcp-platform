@@ -206,6 +206,11 @@ This slice is done when:
 - prefer explicit structured errors over human-language-only failures
 - do not widen feature surface while the risk model is still undefined
 
+## Current Sub-Slices
+
+- [Journal Service README](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/README.md)
+- [Journal Service Roadmap](E:/engine-mcp-platform/docs/platform/security/core-hardening/journal-service/roadmap.md)
+
 ## Sources
 
 - [MCP Transports](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports)
